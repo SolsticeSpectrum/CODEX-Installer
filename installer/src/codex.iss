@@ -1,7 +1,7 @@
 ; CODEX installer
 
-#define LogoCDX  4                                           ; set header logo 1 .. 4
-
+#define LogoCDX         "4"                                  ; set header logo 1 .. 4
+#define Style           "CODEX"                              ; You can find more in Include\Style
 #define Game            "Example Game"                       ; Name of release.
 #define GameExe         "example.exe"                        ; Game executable
 #define Game_NeedSize   "4616"                               ; Needed space for release.
@@ -29,7 +29,7 @@ AllowNoIcons=yes
 Compression=lzma
 SolidCompression=true
 SetupIconFile=Include\GFX\Icons\Cdx.ico
-WizardImageFile=Include\GFX\Logos\Logo{#Str(LogoCDX)}.bmp
+WizardImageFile=Include\GFX\Logos\Logo{#LogoCDX}.bmp
 IconResource=1:Include\GFX\Icons\1.ico|2:Include\GFX\Icons\2.ico|3:Include\GFX\Icons\3.ico|4:Include\GFX\Icons\4.ico|5:Include\GFX\Icons\5.ico|6:Include\GFX\Icons\6.ico|7:Include\GFX\Icons\7.ico
 
 [Run]
@@ -40,7 +40,7 @@ Source:{#SetupFiles}\DLL\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\GFX\Buttons\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\Language\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\Music\Music.ogg; DestDir: {tmp}; Flags: dontcopy
-Source:{#SetupFiles}\Style\Style.vsf; DestDir: {tmp}; Flags: dontcopy
+Source:{#SetupFiles}\Style\*; DestDir: {tmp}; Flags: dontcopy
 Source:Include\DLL\WinTB.dll; Flags: dontcopy;
 #ifndef IS_ENHANCED
 Source:CallbackCtrl.dll; Flags: dontcopy;
@@ -1517,7 +1517,7 @@ const
    ExtractTemporaryFile('bp.dll');
   If not FileExists(ExpandConstant('{tmp}\wintb.dll')) Then
    ExtractTemporaryFile('wintb.dll');
-  StyleStreamCreate('Style.vsf');
+  StyleStreamCreate('{#Style}.vsf');
   CloseHandle(hMutex);
   Result := StartUpAdmin;
  End;
