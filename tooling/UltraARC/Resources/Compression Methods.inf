@@ -1,0 +1,10 @@
+=pZLib3=================================
+#Detects Zlib Streams
+ pZLib3:m1:c32m:t75p
+
+#Detects Deflate Streams
+ pZLib3:m2:c32m:t75p
+
+#Detects Brute Deflate Streams
+ pZLib3:m2:x:c32m:t75p
+========================================

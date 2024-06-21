@@ -1,0 +1,111 @@
+Presenting UltraARC for Inno Setup
+
+What does the program do?
+
+This program allows you split freearc, sevenzip and winrar archives in so that they may be able to fit in media 
+or volume output of your choice, CD700s, DVD5s, DVD9s, BRD25s, BRD50s, doesn't matter, it 
+will fit.
+
+
+How to make the program work?
+
+Set Source
+
+Set First volume content (Optional)
+
+Set options
+  -If planning on using CD Image, Bink and etc, just check those items. It will make the feature(s)
+   Availiable for use
+
+Configure the Freearc Options and other options if available.
+
+Set output
+
+Remember to always make a backup of the data that is about to be processed by the program.
+
+Click start to begin process
+
+
+How to use this program for conversions?
+
+It is very simple.
+
+If you want to make the program use the settings you provided or the ones which you want the 
+program user to use for the conversion, edit the UltraARC.ini, put the default values.
+The default values will be read by the program then they will be set and unavailable to the user
+to edit. Any value that is unedited or left blank will be available to user to edit.
+
+Note: providing settings for checkboxes can be overridden with the command yes or no, 1 or 0,
+false or true
+
+Example:
+
+[Options]
+CDImage=Yes
+BinkIt=No
+
+How to unpack the compressed data?
+
+Decompression is handled by an Inno Setup installer that is hooked up with the UltraARC functions.
+(There is an example of script)
+
+After having the Inno Setup Installer hooked up with UltraARC, just place it in the first media or 
+volume [Hint: records.ini must exist in that directory]
+
+Then you are done, the rest will be handled.
+
+FAQ
+
+Q: What is Inno Setup?
+A: It is a setup/installer program created by Jordan Russell
+   This is where you can get the software
+   http://www.jrsoftware.org
+
+Q: What type of Inno Setup is supported?
+A: Both ANSI and Unicode are supported (Also Enhanced is supported)
+
+Q: Why do I keep getting stream errors in program?
+A: Perheps writing errors, make sure the program has permissions from PC.
+A: Make sure you have enough space.
+
+Q: Why is compression taking long when precomp method is chosen?
+A: Precomp takes a long time when compressing/reflating.
+
+Q: What program was used to created UltraARC?
+A: RAD Studio XE7 (Delphi)
+
+Q: Why does the program show the message "Cannot start converting process"
+A: Either the source directory or output directory does not exist.
+
+Q: What does crunch texture do?
+A: Provides lossy compression to dds and crn texture files.
+
+Q: How to know whether game has ogg audio files
+A: There is ogg.dll, vorbis.dll file to look for in game directory, and the audio files are normally in 
+   the format *.raw but do research to find out more.
+
+Q: What is ISO9660, Joliet and UDF?
+A: http://en.wikipedia.org/wiki/ISO_image
+
+Q: What does Threshold percent do?
+A: It calculates how much data should be dealt with at a time. Higher threshold requires more disk space
+   but may decrease output size.
+
+Credits
+
+Pakrat2k2@Fileforums for testing the program
+Jordan Russell, creator of Inno Setup.
+ProFrager, creator of ISDone, Precomp, Srep plugin, MSC
+Bulat Ziganshin, creator of Freearc and Srep
+Christian Schneider, creator of Precomp
+Vorbis, creator of OggEncode
+RareWare, creator of OggDecode
+Microsoft, creator of CDImage (oscdimg)
+Rich Geldreich, creator of Crunch Advanced Texture Compression
+
+
+UltraARC
+
+Created by Razor12911@Fileforums
+
+Copyright Fileforums 2015. All rights reserved.
