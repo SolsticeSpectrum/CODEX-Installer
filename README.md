@@ -33,3 +33,6 @@ Feel free to contribute by submitting pull requests or reporting issues in the r
 ## Credits
 
 All credits goes to the amazing guys from [FileForums](https://fileforums.com)
+- Rinaldo: [Original Code](https://fileforums.com/showthread.php?t=97259)
+- Jiva: [Fixed CODEX version used in this repo](https://fileforums.com/member.php?u=229855)
+- Razor12911 [Fixed the Enhanced Edition and added several features](https://fileforums.com/showpost.php?p=437536)
