@@ -32,4 +32,4 @@ Feel free to contribute by submitting pull requests or reporting issues in the r
 
 ## Credits
 
-All credits goes to the amazing guys from fileforums.com
+All credits goes to the amazing guys from (fileforums.com)
