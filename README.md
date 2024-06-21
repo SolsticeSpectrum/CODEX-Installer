@@ -28,15 +28,14 @@ This repository contains the code for the CODEX installer and the tools required
    - To compile the installer, you can press `CTRL+F9` or press the Compile button.
    
 4. **Adding the Game Files**:
+   - In the code, change the defines like Game, GameExe, NeedSize and so on.
+   - Compile the Setup, it will show up in `DISTRIBUTABLE`.
    - Navigate to `tooling/UltraARC/` and run `UltraARC.exe`.
-   - Select the game folder as input folder.
-   - Choose some output folder where the compressed files will go.
-   - Switch to the `Output` tab and change archive prefix to `setup-` and extension to `bin`.
+   - Select the game folder as Source folder.
+   - Select `DISTRIBUTABLE` as First Volume Content.
+   - Choose some Output folder where the finilized bundle will go.
+   - Switch to the `Output` tab and change Archive Prefix to `setup-` and Extension to `bin`.
    - You can play with some options here and there to achieve better compression.
-   - Add the `bin` files to `DISTRIBUTABLE`.
-   - Back in the code, change the defines like Game, GameExe, NeedSize and so on.
-   - Compile the Setup and now you can find the setup in `DISTRIBUTABLE`.
-   - Optionally you can add `CODEX` folder in your distributable which can hold the crack files.
 
 ## Contributing
 

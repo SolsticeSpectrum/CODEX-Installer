@@ -1,0 +1,192 @@
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\CODEX\ArcTmp -n@CfgTmp\List1.txt -mppmd C:\Users\ruda0\Desktop\CODEX\setup-1.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\CODEX\setup-1.bin using lzma2
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 37 files, 24,159,039 => 4,733,744 bytes. Ratio 19.59%           
+Compression time: cpu 0.03 sec/real 7.65 sec = 0%. Speed 3.16 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\CODEX\ArcTmp -n@CfgTmp\List2.txt -mppmd C:\Users\ruda0\Desktop\CODEX\setup-2.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\CODEX\setup-2.bin using lzma2
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 92 files, 24,158,846 => 4,101,628 bytes. Ratio 16.98%           
+Compression time: cpu 0.03 sec/real 10.37 sec = 0%. Speed 2.33 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\CODEX\ArcTmp -n@CfgTmp\List3.txt -mppmd C:\Users\ruda0\Desktop\CODEX\setup-3.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\CODEX\setup-3.bin using lzma2
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 121 files, 21,361,894 => 4,407,544 bytes. Ratio 20.63%          
+Compression time: cpu 0.02 sec/real 10.02 sec = 0%. Speed 2.13 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\CODEX\ArcTmp -n@CfgTmp\List4.txt -mppmd C:\Users\ruda0\Desktop\CODEX\setup-4.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\CODEX\setup-4.bin using lzma2
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 1 file, 10,850,792 => 2,164,424 bytes. Ratio 19.95%             
+Compression time: cpu 0.02 sec/real 2.77 sec = 1%. Speed 3.92 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List1.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-1.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-1.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 37 files, 24,159,039 => 24,159,039 bytes. Ratio 100.00%         
+Compression time: cpu 0.00 sec/real 1.04 sec = 0%. Speed 23.31 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List2.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-2.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-2.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 92 files, 24,158,846 => 24,158,846 bytes. Ratio 100.00%         
+Compression time: cpu 0.02 sec/real 2.88 sec = 1%. Speed 8.38 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List3.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-3.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-3.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 121 files, 21,361,894 => 21,361,894 bytes. Ratio 100.00%        
+Compression time: cpu 0.02 sec/real 2.32 sec = 1%. Speed 9.20 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List4.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-4.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-4.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 1 file, 10,850,792 => 10,850,792 bytes. Ratio 100.00%           
+Compression time: cpu 0.03 sec/real 0.51 sec = 6%. Speed 21.25 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List1.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-1.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-1.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 37 files, 24,159,039 => 24,159,039 bytes. Ratio 100.00%         
+Compression time: cpu 0.00 sec/real 0.34 sec = 0%. Speed 71.04 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List2.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-2.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-2.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 92 files, 24,158,846 => 24,158,846 bytes. Ratio 100.00%         
+Compression time: cpu 0.03 sec/real 0.45 sec = 7%. Speed 54.07 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List3.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-3.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-3.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 121 files, 21,361,894 => 21,361,894 bytes. Ratio 100.00%        
+Compression time: cpu 0.00 sec/real 0.46 sec = 0%. Speed 45.96 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wD:\CODEX-Installer\installer\src\DISTRIBUTABLE\ArcTmp -n@CfgTmp\List4.txt -m0 D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-4.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: D:\CODEX-Installer\installer\src\DISTRIBUTABLE\setup-4.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 1 file, 10,850,792 => 10,850,792 bytes. Ratio 100.00%           
+Compression time: cpu 0.02 sec/real 0.28 sec = 6%. Speed 38.44 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List1.txt -m0 C:\Users\ruda0\Desktop\setup-1.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-1.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 37 files, 24,159,039 => 24,159,039 bytes. Ratio 100.00%         
+Compression time: cpu 0.02 sec/real 0.16 sec = 10%. Speed 154.24 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List2.txt -m0 C:\Users\ruda0\Desktop\setup-2.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-2.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 92 files, 24,158,846 => 24,158,846 bytes. Ratio 100.00%         
+Compression time: cpu 0.02 sec/real 0.29 sec = 5%. Speed 84.09 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List3.txt -m0 C:\Users\ruda0\Desktop\setup-3.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-3.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 121 files, 21,361,894 => 21,361,894 bytes. Ratio 100.00%        
+Compression time: cpu 0.02 sec/real 0.21 sec = 7%. Speed 100.81 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List4.txt -m0 C:\Users\ruda0\Desktop\setup-4.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-4.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 1 file, 10,850,792 => 10,850,792 bytes. Ratio 100.00%           
+Compression time: cpu 0.00 sec/real 0.12 sec = 0%. Speed 89.16 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List1.txt -m0 C:\Users\ruda0\Desktop\setup-1.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-1.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 37 files, 24,159,039 => 24,159,039 bytes. Ratio 100.00%         
+Compression time: cpu 0.02 sec/real 0.31 sec = 5%. Speed 77.38 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List2.txt -m0 C:\Users\ruda0\Desktop\setup-2.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-2.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 92 files, 24,158,846 => 24,158,846 bytes. Ratio 100.00%         
+Compression time: cpu 0.00 sec/real 0.14 sec = 0%. Speed 176.62 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List3.txt -m0 C:\Users\ruda0\Desktop\setup-3.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-3.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 121 files, 21,361,894 => 21,361,894 bytes. Ratio 100.00%        
+Compression time: cpu 0.02 sec/real 0.16 sec = 10%. Speed 132.95 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List4.txt -m0 C:\Users\ruda0\Desktop\setup-4.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-4.bin using storing
+Memory for compression 256kb, decompression 256kb, cache 0b
+Compressed 1 file, 10,850,792 => 10,850,792 bytes. Ratio 100.00%           
+Compression time: cpu 0.00 sec/real 0.08 sec = 0%. Speed 141.26 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List1.txt -mlzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8 C:\Users\ruda0\Desktop\setup-1.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-1.bin using lzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 37 files, 24,159,039 => 4,728,348 bytes. Ratio 19.57%           
+Compression time: cpu 0.02 sec/real 4.94 sec = 0%. Speed 4.89 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List2.txt -mlzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8 C:\Users\ruda0\Desktop\setup-2.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-2.bin using lzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 92 files, 24,158,846 => 4,100,552 bytes. Ratio 16.97%           
+Compression time: cpu 0.00 sec/real 5.00 sec = 0%. Speed 4.84 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List3.txt -mlzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8 C:\Users\ruda0\Desktop\setup-3.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-3.bin using lzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 121 files, 21,361,894 => 4,391,016 bytes. Ratio 20.56%          
+Compression time: cpu 0.00 sec/real 4.16 sec = 0%. Speed 5.13 mB/s
+All OK
+
+D:\CODEX-Installer\tooling\UltraARC>arc a -ep1 -r -ed -dses -s; -di -i2 -wC:\Users\ruda0\Desktop\ArcTmp -n@CfgTmp\List4.txt -mlzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8 C:\Users\ruda0\Desktop\setup-4.bin -dpD:\Program Files\Audacity
+FreeArc 0.67 (March 15 2014) Using additional options: --cache=0 --logfile=_Compression.log
+Creating archive: C:\Users\ruda0\Desktop\setup-4.bin using lzma:a1:mfbt4:d256m:fb273:mc1000000000:lc8
+Memory for compression 0b, decompression 0b, cache 0b
+Compressed 1 file, 10,850,792 => 2,166,890 bytes. Ratio 19.97%             
+Compression time: cpu 0.00 sec/real 2.48 sec = 0%. Speed 4.37 mB/s
+All OK

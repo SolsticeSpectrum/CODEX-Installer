@@ -1,13 +1,15 @@
 ; CODEX installer
-;
-#define Game            "Assassins Creed Syndicate"          ; Name of release.
-#define GameExe         "ACS.exe"                            ; Game executable
-#define Game_NeedSize   "59989"                              ; Needed space for release.
-#define MyAppURL        "http://store.steampowered.com/app/441830"
-#define AppVersion      "1.4.0.0"
-#define AppPublisher    "Ubisoft"
+
+#define LogoCDX  4                                           ; set header logo 1 .. 4
+
+#define Game            "Example Game"                       ; Name of release.
+#define GameExe         "example.exe"                        ; Game executable
+#define Game_NeedSize   "4616"                               ; Needed space for release.
+#define MyAppURL        "http://store.steampowered.com/app/480"
+#define AppVersion      "1.0.0.0"
+#define AppPublisher    "Valve"
 #define Game_CrackDir   "{src}\CODEX"                        ; Game crack directory (if present).
-#define SetupFiles      "InstallationFiles"                  ; Files needed for the installation
+#define SetupFiles      "Include"                            ; Files needed for the installation
 #define Uninstallexe    "unins000.exe
 
 [Setup]
@@ -26,20 +28,24 @@ UninstallDisplayIcon={app}\{#GameExe}
 AllowNoIcons=yes
 Compression=lzma
 SolidCompression=true
-SetupIconFile=embedded\codex.ico
-WizardImageFile=embedded\codex.bmp
-IconResource=1:embedded\1.ico|2:embedded\2.ico|3:embedded\3.ico|4:embedded\4.ico|5:embedded\5.ico|6:embedded\6.ico|7:embedded\7.ico
+SetupIconFile=Include\GFX\Icons\Cdx.ico
+WizardImageFile=Include\GFX\Logos\Logo{#Str(LogoCDX)}.bmp
+IconResource=1:Include\GFX\Icons\1.ico|2:Include\GFX\Icons\2.ico|3:Include\GFX\Icons\3.ico|4:Include\GFX\Icons\4.ico|5:Include\GFX\Icons\5.ico|6:Include\GFX\Icons\6.ico|7:Include\GFX\Icons\7.ico
 
 [Run]
 ;Filename: {app}\{#GameExe}; Description: {cm:LaunchProgram,{#StringChange(GameExe, '&', '&&')}}; Flags: nowait postinstall skipifsilent unchecked
 
 [Files]
-Source:{#SetupFiles}\*; DestDir: {tmp}; Flags: dontcopy
-Source:InstallationFiles\WinTB.dll; Flags: dontcopy;
+Source:{#SetupFiles}\DLL\*; DestDir: {tmp}; Flags: dontcopy
+Source:{#SetupFiles}\GFX\Buttons\*; DestDir: {tmp}; Flags: dontcopy
+Source:{#SetupFiles}\Language\*; DestDir: {tmp}; Flags: dontcopy
+Source:{#SetupFiles}\Music\Music.ogg; DestDir: {tmp}; Flags: dontcopy
+Source:{#SetupFiles}\Style\Style.vsf; DestDir: {tmp}; Flags: dontcopy
+Source:Include\DLL\WinTB.dll; Flags: dontcopy;
 #ifndef IS_ENHANCED
 Source:CallbackCtrl.dll; Flags: dontcopy;
 #endif
-;Source:embedded\games.ico; Flags: dontcopy;
+;Source:Include\GFX\Icons\games.ico; Flags: dontcopy;
 
 [Registry]
 Root: HKCU; Subkey: "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; ValueName: "{app}\SETSUNA.exe"; ValueType: String; ValueData: "RUNASADMIN"; Check: "CheckError"; Flags: uninsdeletevalue uninsdeletekeyifempty
