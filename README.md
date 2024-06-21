@@ -32,6 +32,8 @@ This repository contains the code for the CODEX installer and the tools required
    - Choose some Output folder where the finilized bundle will go.
    - Switch to the `Output` tab and change Archive Prefix to `setup-` and Extension to `bin`.
    - You can play with some options here and there to achieve better compression.
+   - If you select CD Image to bundle into `.iso`, you can add an icon in `Options -> CD Image`.
+   - The icon can be found in the root of the project.
 
 ## Contributing
 
