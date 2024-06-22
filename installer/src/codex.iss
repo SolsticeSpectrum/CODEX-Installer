@@ -1,15 +1,17 @@
 ; CODEX installer
 
-#define LogoCDX         "4"                                  ; set header logo 1 .. 4
-#define Style           "CODEX"                              ; You can find more in Include\Style
+#define Style           "CODEX"                              ; You can find more in Include\Style (PLAZA/RUNE + more).
+#define GroupName       "CODEX"                              ; Name of the group (rename crack directory).
+#define LogoGroup       "5"                                  ; set header logo 1 .. 8 (more in Include/GFX/Logos)
+#define IconGroup       "1"                                  ; set app icon 1 .. 3 (more in Include/GFX/Icons)
 #define Game            "Example Game"                       ; Name of release.
 #define GameExe         "example.exe"                        ; Game executable
 #define Game_NeedSize   "4616"                               ; Needed space for release.
 #define MyAppURL        "http://store.steampowered.com/app/480"
 #define AppVersion      "1.0.0.0"
 #define AppPublisher    "Valve"
-#define Game_CrackDir   "{src}\CODEX"                        ; Game crack directory (if present).
-#define SetupFiles      "Include"                            ; Files needed for the installation
+#define Game_CrackDir   "{src}\" + GroupName                 ; Game crack directory (if present).
+#define SetupFiles      "Include"                            ; Files needed for the installation.
 #define Uninstallexe    "unins000.exe
 
 [Setup]
@@ -28,8 +30,8 @@ UninstallDisplayIcon={app}\{#GameExe}
 AllowNoIcons=yes
 Compression=lzma
 SolidCompression=true
-SetupIconFile=Include\GFX\Icons\Cdx.ico
-WizardImageFile=Include\GFX\Logos\Logo{#LogoCDX}.bmp
+SetupIconFile=Include\GFX\Icons\Icon{#IconGroup}.ico
+WizardImageFile=Include\GFX\Logos\Logo{#LogoGroup}.bmp
 IconResource=1:Include\GFX\Icons\1.ico|2:Include\GFX\Icons\2.ico|3:Include\GFX\Icons\3.ico|4:Include\GFX\Icons\4.ico|5:Include\GFX\Icons\5.ico|6:Include\GFX\Icons\6.ico|7:Include\GFX\Icons\7.ico
 
 [Run]
@@ -40,7 +42,7 @@ Source:{#SetupFiles}\DLL\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\GFX\Buttons\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\Language\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\Music\Music.ogg; DestDir: {tmp}; Flags: dontcopy
-Source:{#SetupFiles}\Style\*; DestDir: {tmp}; Flags: dontcopy
+Source:{#SetupFiles}\Style\{#Style}.vsf; DestDir: {tmp}; Flags: dontcopy
 Source:Include\DLL\WinTB.dll; Flags: dontcopy;
 #ifndef IS_ENHANCED
 Source:CallbackCtrl.dll; Flags: dontcopy;
@@ -80,9 +82,9 @@ CreateIconGroup=&Create a Start Menu folder
 NoUninstall=Do not create uninstaller and do not write any specific system info
 ExitBtn=&Exit
 msgIsAdmin=The setup process has been started without administrator rights. Do you want to procceed ?
-CopyCrack=Copy contents of CODEX directory to installdir
+CopyCrack=Copy contents of {#GroupName} directory to installdir
 ExDir=Directory to copy is wrong or empty!
-ErrCopy=Auto copying of CODEX folder is blocked by a system or AV! You need to copy CODEX folder yourself.
+ErrCopy=Auto copying of {#GroupName} folder is blocked by a system or AV! You need to copy {#GroupName} folder yourself.
 FreeSpace1=At least
 FreeSpace2=of free space required
 ErrSize=There is not enough of free space on selected disk!
