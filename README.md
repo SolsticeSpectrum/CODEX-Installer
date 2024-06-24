@@ -1,5 +1,5 @@
 # CODEX Installer + build tools
-
+![image](https://github.com/SolsticeSpectrum/CODEX-Installer/assets/38611351/b51c57de-a5fa-466d-b8d1-78ac38030396)
 This repository contains the code for the CODEX installer and the tools required to build it
 
 ## Directory Structure
@@ -23,6 +23,7 @@ This repository contains the code for the CODEX installer and the tools required
 2. **Testing and Compiling**:
    - To test your changes you can press `F9` or click the Run button.
    - To compile the installer, you can press `CTRL+F9` or press the Compile button.
+   - If you want to modify one of the styles in `src/installer/Include/Style`, you need RAD Studio.
    
 3. **Adding the Game Files**:
    - In the code, change the defines like Game, GameExe, NeedSize and so on.
