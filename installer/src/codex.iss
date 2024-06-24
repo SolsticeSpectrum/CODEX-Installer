@@ -4,6 +4,7 @@
 #define GroupName       "CODEX"                              ; Name of the group (rename crack directory).
 #define LogoGroup       "5"                                  ; set header logo 1 .. 8 (more in Include/GFX/Logos)
 #define IconGroup       "1"                                  ; set app icon 1 .. 3 (more in Include/GFX/Icons)
+#define MusicGroup      "1"                                  ; set app icon 1 .. 3 (more in Include/Music)
 #define Game            "Example Game"                       ; Name of release.
 #define GameExe         "example.exe"                        ; Game executable
 #define Game_NeedSize   "4616"                               ; Needed space for release.
@@ -41,7 +42,7 @@ IconResource=1:Include\GFX\Icons\1.ico|2:Include\GFX\Icons\2.ico|3:Include\GFX\I
 Source:{#SetupFiles}\DLL\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\GFX\Buttons\*; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\Language\*; DestDir: {tmp}; Flags: dontcopy
-Source:{#SetupFiles}\Music\Music.ogg; DestDir: {tmp}; Flags: dontcopy
+Source:{#SetupFiles}\Music\Music{#MusicGroup}.ogg; DestDir: {tmp}; Flags: dontcopy
 Source:{#SetupFiles}\Style\{#Style}.vsf; DestDir: {tmp}; Flags: dontcopy
 Source:Include\DLL\WinTB.dll; Flags: dontcopy;
 #ifndef IS_ENHANCED
@@ -1232,7 +1233,7 @@ const
   gv56.OnMouseMove := @ImgButtonOnMove;
   BASS_Init(-1, 44100, 0, 0, 0);
   BASS_Start;
-  gv58 := BASS_StreamCreateFile(True, 'Music.ogg', 0, 0, 4);
+  gv58 := BASS_StreamCreateFile(True, 'Music{#MusicGroup}.ogg', 0, 0, 4);
   gv63 := gv55.Width;
   gv62 := (gv56.Left + gv56.Width / 4 + ScaleX(1) - gv55.Left) / (gv63 + gv56.Width / 4);
   BASS_ChangePos(gv62);
