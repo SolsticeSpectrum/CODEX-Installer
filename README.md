@@ -45,7 +45,8 @@ This repository contains the code for the CODEX installer and the tools required
    - Change `GroupName` to the same.
    - Don't forget to change the crack direcotry name.
    - Set `LogoGroup` to 7 and `IconGroup` to 2 for PLAZA.
-   - Set logo to 8 and icon to 3 for RUNE.   
+   - Set logo to 8 and icon to 3 for RUNE.
+   - You can also change the music to PLAZA/RUNE by changin `MusicGroup`.
 
 ## Contributing
 
