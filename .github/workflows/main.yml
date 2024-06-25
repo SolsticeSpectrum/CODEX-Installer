@@ -27,4 +27,4 @@ jobs:
         automatic_release_tag: "latest"
         prerelease: false
         title: "New Installer Release"
-        files: .\installer\src\DISTRIBUTABLE\setup.exe
+        files: ./installer/src/DISTRIBUTABLE/setup.exe
