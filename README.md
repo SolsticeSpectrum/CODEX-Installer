@@ -18,7 +18,7 @@ This repository contains the code for the CODEX installer and the tools required
    - Navigate to `tooling/InnoSetupEE/`.
    - Run `Compil32.exe` to open the enhanced edition of Inno Setup.
    - Go to `File -> Open` and navigate `installer/src`.
-   - Open `codex.iss` and now you can modify the installer.
+   - Open `setup.iss` and now you can modify the installer.
 
 2. **Testing and Compiling**:
    - To test your changes you can press `F9` or click the Run button.
@@ -41,7 +41,7 @@ This repository contains the code for the CODEX installer and the tools required
    
 4. **Additional Information**:
    - You can easily switch between different group graphics.
-   - In `codex.iss` change `Style` to `PLAZA/RUNE`.
+   - In `setup.iss` change `Style` to `PLAZA/RUNE`.
    - There are more styles to choose from in `src/installer/Include/Style`.
    - Change `GroupName` to the same.
    - Don't forget to change the crack direcotry name.

@@ -18,54 +18,74 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Modify codex.iss for CODEX
+    - name: Modify setup.iss for CODEX
       run: |
-        (Get-Content .\installer\src\codex.iss) -replace '#define OutputName\s+\"setup\"', '#define OutputName      "codex"' | Set-Content .\installer\src\codex.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define OutputName\s+\"setup\"', '#define OutputName      "codex"' | Set-Content .\installer\src\setup.iss
       shell: pwsh
 
     - name: Compile CODEX with ISCC
       run: |
-        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\codex.iss
+        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\setup.iss
 
-    - name: Modify codex.iss for PLAZA
+    - name: Modify setup.iss for PLAZA
       run: |
-        (Get-Content .\installer\src\codex.iss) -replace '#define Style\s+\"CODEX\"', '#define Style           "PLAZA"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define GroupName\s+\"CODEX\"', '#define GroupName       "PLAZA"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define LogoGroup\s+\"5\"', '#define LogoGroup       "7"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define IconGroup\s+\"1\"', '#define IconGroup       "2"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define MusicGroup\s+\"1\"', '#define MusicGroup       "2"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define OutputName\s+\"codex\"', '#define OutputName      "plaza"' |
-        Set-Content .\installer\src\codex.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define Style\s+\"CODEX\"', '#define Style           "PLAZA"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define GroupName\s+\"CODEX\"', '#define GroupName       "PLAZA"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define LogoGroup\s+\"5\"', '#define LogoGroup       "7"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define IconGroup\s+\"1\"', '#define IconGroup       "2"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define MusicGroup\s+\"1\"', '#define MusicGroup       "2"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define OutputName\s+\"codex\"', '#define OutputName      "plaza"' |
+        Set-Content .\installer\src\setup.iss
       shell: pwsh
 
     - name: Compile PLAZA with ISCC
       run: |
-        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\codex.iss
+        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\setup.iss
 
-    - name: Modify codex.iss for RUNE
+    - name: Modify setup.iss for RUNE
       run: |
-        (Get-Content .\installer\src\codex.iss) -replace '#define Style\s+\"PLAZA\"', '#define Style           "RUNE"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define GroupName\s+\"PLAZA\"', '#define GroupName       "RUNE"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define LogoGroup\s+\"7\"', '#define LogoGroup       "8"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define IconGroup\s+\"2\"', '#define IconGroup       "3"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define MusicGroup\s+\"2\"', '#define MusicGroup       "3"' |
-        Set-Content .\installer\src\codex.iss
-        (Get-Content .\installer\src\codex.iss) -replace '#define OutputName\s+\"plaza\"', '#define OutputName      "rune"' |
-        Set-Content .\installer\src\codex.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define Style\s+\"PLAZA\"', '#define Style           "RUNE"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define GroupName\s+\"PLAZA\"', '#define GroupName       "RUNE"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define LogoGroup\s+\"7\"', '#define LogoGroup       "8"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define IconGroup\s+\"2\"', '#define IconGroup       "3"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define MusicGroup\s+\"2\"', '#define MusicGroup       "3"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define OutputName\s+\"plaza\"', '#define OutputName      "rune"' |
+        Set-Content .\installer\src\setup.iss
       shell: pwsh
 
     - name: Compile RUNE with ISCC
       run: |
-        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\codex.iss
+        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\setup.iss
+        
+    - name: Modify setup.iss for ENDEREX
+      run: |
+        (Get-Content .\installer\src\setup.iss) -replace '#define Style\s+\"RUNE\"', '#define Style           "ENDEREX"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define GroupName\s+\"RUNE\"', '#define GroupName       "ENDEREX"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define LogoGroup\s+\"8\"', '#define LogoGroup       "9"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define IconGroup\s+\"3\"', '#define IconGroup       "4"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define MusicGroup\s+\"3\"', '#define MusicGroup       "4"' |
+        Set-Content .\installer\src\setup.iss
+        (Get-Content .\installer\src\setup.iss) -replace '#define OutputName\s+\"rune\"', '#define OutputName      "enderex"' |
+        Set-Content .\installer\src\setup.iss
+      shell: pwsh
+
+    - name: Compile ENDEREX with ISCC
+      run: |
+        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\setup.iss
 
     - name: Create GitHub Release
       uses: marvinpinto/action-automatic-releases@latest
