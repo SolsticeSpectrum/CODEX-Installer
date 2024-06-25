@@ -1,0 +1,12 @@
+installer/src/DISTRIBUTABLE/*
+
+installer/src/DISTRIBUTABLE/CODEX/*
+!installer/src/DISTRIBUTABLE/CODEX/-- name this folder after group name ---
+!installer/src/DISTRIBUTABLE/CODEX/-- this folder is optional --
+!installer/src/DISTRIBUTABLE/CODEX/-- you can add crack files here --
+
+tooling/InnoUnp/Setup/
+tooling/InnoUnp/*.exe
+!tooling/InnoUnp/Unp/43.exe
+
+tooling/UltraARC/_Compression.log
