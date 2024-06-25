@@ -1,0 +1,30 @@
+name: Build and Release Installer
+
+concurrency:
+  group: "build-release"
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '*.md'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions: write-all
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Compile with ISCC
+      run: |
+        .\tooling\InnoSetupEE\ISCC.exe .\installer\src\codex.iss
+    - name: Create GitHub Release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: false
+        title: "New Installer Release"
+        files: .\installer\src\DISTRIBUTABLE\setup.exe
