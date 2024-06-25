@@ -69,7 +69,7 @@ jobs:
         
     - name: Modify setup.iss for ENDEREX
       run: |
-        (Get-Content .\installer\src\setup.iss) -replace '#define Style\s+\"RUNE\"', '#define Style           "ENDEREX"' |
+        (Get-Content .\installer\src\setup.iss) -replace '#define Style\s+\"RUNE\"', '#define Style           "CobaltXEMedia"' |
         Set-Content .\installer\src\setup.iss
         (Get-Content .\installer\src\setup.iss) -replace '#define GroupName\s+\"RUNE\"', '#define GroupName       "ENDEREX"' |
         Set-Content .\installer\src\setup.iss
