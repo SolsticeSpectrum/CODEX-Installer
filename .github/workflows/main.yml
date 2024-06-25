@@ -73,5 +73,5 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
         prerelease: false
-        title: "New Installer Release"
+        title: "Latest Debug"
         files: ./installer/src/DISTRIBUTABLE/*.exe
