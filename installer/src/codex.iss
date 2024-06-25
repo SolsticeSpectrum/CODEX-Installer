@@ -13,6 +13,7 @@
 #define AppPublisher    "Valve"
 #define Game_CrackDir   "{src}\" + GroupName                 ; Game crack directory (if present).
 #define SetupFiles      "Include"                            ; Files needed for the installation.
+#define OutputName      "setup"                              ; Name of the output setup file.
 #define Uninstallexe    "unins000.exe
 
 [Setup]
@@ -25,7 +26,7 @@ DefaultDirName={code:DefDirWiz}
 DefaultGroupName={#Game}
 ArchitecturesInstallIn64BitMode=x64
 OutputDir=.\DISTRIBUTABLE
-OutputBaseFilename=setup
+OutputBaseFilename={#OutputName}
 Uninstallable=Unnin
 UninstallDisplayIcon={app}\{#GameExe}
 AllowNoIcons=yes
