@@ -1,5 +1,5 @@
 # CODEX Installer + build tools
-![image](https://github.com/SolsticeSpectrum/CODEX-Installer/assets/38611351/b51c57de-a5fa-466d-b8d1-78ac38030396)
+![image](https://github.com/user-attachments/assets/0f3c3cdb-be2e-4a8c-8d15-8fafa4431cb0)
 This repository contains the code for the CODEX installer and the tools required to build it
 
 ## Directory Structure
