@@ -41,7 +41,7 @@ This repository contains the code for the CODEX installer and the tools required
    - The icon can be found in the root of the project.
   
 4. **IMPORTANT**:
-   - `UltraARC` may one of the bins into two or more parts aka `setup-2a` and `setup-2b` for example.
+   - `UltraARC` may split one of the bins into two or more parts aka `setup-2a` and `setup-2b` for example.
    - If this happens, you have to fiddle with the `Thershold Percent` option under `Output` tab.
    - The installer doesn't know how to deal with parted archives.
    
