@@ -1,4 +1,4 @@
-name: Build and Release Installer
+name: Build and Release Example Installer
 
 concurrency:
   group: "build-release"
@@ -93,5 +93,5 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
         prerelease: false
-        title: "Latest Debug"
+        title: "Latest Example Preview"
         files: ./installer/src/DISTRIBUTABLE/*.exe
