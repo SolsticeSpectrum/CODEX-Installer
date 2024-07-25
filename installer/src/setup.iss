@@ -1,26 +1,25 @@
 ; CODEX installer
 
-#define Style           "CODEX"                              ; You can find more in Include\Style (PLAZA/RUNE + more).
-#define GroupName       "CODEX"                              ; Name of the group (rename crack directory).
+#define Style           "CODEX"                              ; You can find more in Include\Style (PLAZA/RUNE + more)
+#define GroupName       "CODEX"                              ; Name of the group (rename crack directory)
 #define LogoGroup       "5"                                  ; set header logo 1 .. 8 (more in Include/GFX/Logos)
 #define IconGroup       "1"                                  ; set app icon 1 .. 3 (more in Include/GFX/Icons)
 #define MusicGroup      "1"                                  ; set app icon 1 .. 3 (more in Include/Music)
-#define Game            "Example Game"                       ; Name of release.
-#define GameExe         "example.exe"                        ; Game executable
-#define Game_NeedSize   "4616"                               ; Needed space for release.
-#define MyAppURL        "http://store.steampowered.com/app/480"
+#define Game            "Example Game"                       ; Name of release
+#define GameExe         "example.exe"                        ; Game executable (include gamedir relative path if needed)
+#define GameNeedSize    "4616"                               ; Needed space for release
+#define AppURL          "http://store.steampowered.com/app/480"
 #define AppVersion      "1.0.0.0"
 #define AppPublisher    "Valve"
-#define Game_CrackDir   "{src}\" + GroupName                 ; Game crack directory (if present).
-#define SetupFiles      "Include"                            ; Files needed for the installation.
-#define OutputName      "setup"                              ; Name of the output setup file.
-#define Uninstallexe    "unins000.exe
+#define GameCrackDir    "{src}\" + GroupName                 ; Game crack directory (if present)
+#define SetupFiles      "Include"                            ; Files needed for the installation
+#define OutputName      "setup"                              ; Name of the output setup file
 
 [Setup]
 AppName={#Game}
 AppVerName={#Game}
 AppPublisher={#AppPublisher}
-AppSupportURL={#MyAppURL}
+AppSupportURL={#AppURL}
 AppVersion={#AppVersion}
 DefaultDirName={code:DefDirWiz}
 DefaultGroupName={#Game}
@@ -52,13 +51,13 @@ Source:CallbackCtrl.dll; Flags: dontcopy;
 ;Source:Include\GFX\Icons\games.ico; Flags: dontcopy;
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; ValueName: "{app}\SETSUNA.exe"; ValueType: String; ValueData: "RUNASADMIN"; Check: "CheckError"; Flags: uninsdeletevalue uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; ValueName: "{app}\{#GameExe}"; ValueType: String; ValueData: "RUNASADMIN"; Check: "CheckError"; Flags: uninsdeletevalue uninsdeletekeyifempty
 
 [Icons]
 Name: "{userdesktop}\{#Game}"; Filename: "{app}\{#GameExe}"; Check: Icon and CheckError;
 Name: "{group}\{#Game}"; Filename: "{app}\{#GameExe}"; Check: Start and CheckError;
-Name: "{group}\{cm:UninstallProgram,}"; Filename: "{uninstallexe}"; Check: Unnin and Start and CheckError;
-Name: "{group}\{cm:ProgramOnTheWeb,I am Setsuna}"; Filename: "{#MyAppURL}";
+Name: "{group}\{cm:UninstallProgram,{#Game}}"; Filename: "{uninstallexe}"; Check: Unnin and Start and CheckError;
+Name: "{group}\{cm:ProgramOnTheWeb,{#Game}}"; Filename: "{#AppURL}";
 
 [Languages]
 Name: "English"; MessagesFile: "compiler:Default.isl"
@@ -135,13 +134,11 @@ Type: filesandordirs; Name: {app}
   lblGroupDir: TLabel;
   lblInstallResult: TLabel;
   bvlDirectories: TBevel;
-  bvlInstallForm: TBevel;
   bvlDirInstall: TBevel;
-  bvlStartMenuDir: TBevel;
   bvlIconGroup: TBevel;
-  bvlOptionsForm: TBevel;
+  bvlOptions: TBevel;
   bvlInstallOptions: TBevel;
-  bvlButtonForm: TBevel;
+  bvlButtons: TBevel;
   bvlLeftButton: TBevel;
   bvlRightButton: TBevel;
   bvlProgressForm: TBevel;
@@ -152,7 +149,6 @@ Type: filesandordirs; Name: {app}
   chbCopyCrack: TCheckBox;
   cbxDrive: TNewComboBox;
   ImageName: AnsiString;
-  FNameSearch: AnsiString;
   FreeMB: Cardinal;
   TotalMB: Cardinal;
   hMutex: DWord;
@@ -195,13 +191,13 @@ Type: filesandordirs; Name: {app}
 
  const
   // GetDriveType
-  DRIVE_UNKNOWN                 = 0;      // UNKNOWN
-  DRIVE_NO_ROOT_DIR             = 1;      // Root path invalid
-  DRIVE_REMOVABLE               = 2;      // Removable
-  DRIVE_FIXED                   = 3;      // Fixed
-  DRIVE_REMOTE                  = 4;      // Network
-  DRIVE_CDROM                   = 5;      // DVD-ROM and CD-ROM
-  DRIVE_RAMDISK                 = 6;      // Ram disk
+  DRIVE_UNKNOWN                 = 0;          // UNKNOWN
+  DRIVE_NO_ROOT_DIR             = 1;          // Root path invalid
+  DRIVE_REMOVABLE               = 2;          // Removable
+  DRIVE_FIXED                   = 3;          // Fixed
+  DRIVE_REMOTE                  = 4;          // Network
+  DRIVE_CDROM                   = 5;          // DVD-ROM and CD-ROM
+  DRIVE_RAMDISK                 = 6;          // Ram disk
 
  const
   // BASS
@@ -281,11 +277,11 @@ Type: filesandordirs; Name: {app}
   { $EXTERNALSYM FOF_CONFIRMMOUSE }
   FOF_CONFIRMMOUSE              = $0002;
   { $EXTERNALSYM FOF_SILENT }
-  FOF_SILENT                    = $0004;  // don't create progress/report
+  FOF_SILENT                    = $0004;      // Don't create progress/report
   { $EXTERNALSYM FOF_RENAMEONCOLLISION }
   FOF_RENAMEONCOLLISION         = $0008;
   { $EXTERNALSYM FOF_NOCONFIRMATION }
-  FOF_NOCONFIRMATION            = $0010;  // Don't prompt the user.
+  FOF_NOCONFIRMATION            = $0010;      // Don't prompt the user.
   FOF_WANTMAPPINGHANDLE         = $0020;
   FOF_ALLOWUNDO                 = $0040;
   FOF_FILESONLY                 = $0080;
@@ -392,7 +388,7 @@ Type: filesandordirs; Name: {app}
  procedure TaskBarUpdateButtons(APP: HWND);
  external 'TaskBarUpdateButtons@{tmp}\WinTB.dll stdcall delayload';
  procedure TaskBarButtonEnabled(Button: LongInt; Enabled: Boolean);
- external 'TaskBarButtonEnabled@{tmp}\WinTB.dll stdcall delayload'; // cdecl = 2, stdcall = 3  -  delayload = 1, [ ] = 0
+ external 'TaskBarButtonEnabled@{tmp}\WinTB.dll stdcall delayload';  // cdecl = 2, stdcall = 3  -  delayload = 1, [ ] = 0
  procedure TaskBarButtonToolTip(Button: LongInt; Hint: PAnsiChar);
  external 'TaskBarButtonToolTip@{tmp}\WinTB.dll stdcall delayload';
  procedure TaskBarButtonIcon(Button: LongInt; Icon: DWord);
@@ -456,6 +452,7 @@ Type: filesandordirs; Name: {app}
    Result := not ISDoneError;
   end;
 
+ // Wtf does this do?
  function NoSD: String;
   var
    x, bit, i: Integer;
@@ -616,8 +613,6 @@ Type: filesandordirs; Name: {app}
   end;
 
  procedure BtnOnClick(Btn: Integer);
-  var
-   i: LongInt;
   begin
    Case Btn of
     hInstall : if ISStep = 1 then
@@ -670,7 +665,7 @@ Type: filesandordirs; Name: {app}
    end;
   end;
 
- procedure MyOnTimer1(h, msg, idevent, dwTime: LongWord);
+ procedure MyOnTimer(h, msg, idevent, dwTime: LongWord);
   begin
    if Transparency > 100 then begin
     KillTimer(WizardForm.Handle, TimerID);
@@ -690,7 +685,7 @@ Type: filesandordirs; Name: {app}
     end;
     SetWindowLong(WizardForm.Handle, GWL_EXSTYLE, GetWindowLong(WizardForm.Handle, GWL_EXSTYLE) or WS_EX_LAYERED);
     if (Transparency = 0) and (DraggingEnabled <> 0) then begin
-     TimerID := SetTimer(WizardForm.Handle, 1, 10, WrapTimerProc(@MyOnTimer1, 4));
+     TimerID := SetTimer(WizardForm.Handle, 1, 10, WrapTimerProc(@MyOnTimer, 4));
     end;
    end;
    if Msg = 533 then begin
@@ -703,8 +698,8 @@ Type: filesandordirs; Name: {app}
 
  function IsCrackTheres: Boolean;
   begin
-   if DirExists(ExpandConstant('{#Game_CrackDir}')) then begin
-    if not PathIsDirectoryEmpty(ExpandConstant('{#Game_CrackDir}')) then begin
+   if DirExists(ExpandConstant('{#GameCrackDir}')) then begin
+    if not PathIsDirectoryEmpty(ExpandConstant('{#GameCrackDir}')) then begin
      Result := True; end
     else begin
      Result := False;
@@ -732,7 +727,6 @@ Type: filesandordirs; Name: {app}
  procedure CBDriveOnClick(Sender: TObject);
   var
    DirValue: AnsiString;
-   I: Integer;
   begin
    DirValue := WizardForm.DirEdit.Text;
    Delete(DirValue, 1, Length(cbxDrive.Text));
@@ -778,7 +772,7 @@ Type: filesandordirs; Name: {app}
      MsgBox(ExpandConstant('{cm:ErrBro}'), mbError, MB_OK);
      Result := False;
     end;
-    if FreeMB < {#Game_NeedSize} then begin
+    if FreeMB < {#GameNeedSize} then begin
      MsgBox(ExpandConstant('{cm:ErrSize}'), mbError, MB_OK);
      Result := False;
     end;
@@ -797,8 +791,8 @@ Type: filesandordirs; Name: {app}
   begin
    Path := ExtractFileDrive(WizardForm.DirEdit.Text);
    GetSpaceOnDisk(Path, True, FreeMB, TotalMB);
-   lblDiskSizeNeeded.Caption := ExpandConstant('{cm:FreeSpace1}') + ' ' + MbOrTb({#Game_NeedSize})+ ' ' + ExpandConstant('{cm:FreeSpace2}');
-   if not (FreeMB > {#Game_NeedSize}) then begin
+   lblDiskSizeNeeded.Caption := ExpandConstant('{cm:FreeSpace1}') + ' ' + MbOrTb({#GameNeedSize})+ ' ' + ExpandConstant('{cm:FreeSpace2}');
+   if not (FreeMB > {#GameNeedSize}) then begin
     lblDiskSizeNeeded.Font.Color := $1B1BE7; end
    else begin
     lblDiskSizeNeeded.Font.Color := $E6E0E1;
@@ -928,8 +922,6 @@ Type: filesandordirs; Name: {app}
   end;
 
  function UnnIn: Boolean;
-  var
-   Unused: Integer;
   begin
    if ((chbNoUninstaller.Checked) and (ISDoneCancel <> 1)) then
     Result := False
@@ -1088,7 +1080,7 @@ Type: filesandordirs; Name: {app}
    end;
   end;
 
- procedure ImgButton1OnClick(Sender: TObject);
+ procedure ImgButtonOnClick(Sender: TObject);
   begin
    if not (BASS_ChannelIsActive(mp3HNDL) = BASS_ACTIVE_PAUSED) then begin
     BASS_ChannelPause(mp3HNDL);
@@ -1125,7 +1117,7 @@ Type: filesandordirs; Name: {app}
    bmpPauseButton.OnMouseLeave := @ImgButtonOnMouseLeave;
    bmpPauseButton.OnMouseDown := @ImgButtonOnMouseDown;
    bmpPauseButton.OnMouseUp := @ImgButtonOnMouseUp;
-   bmpPauseButton.OnClick := @ImgButton1OnClick;
+   bmpPauseButton.OnClick := @ImgButtonOnClick;
    bmpPlayButton := TBitmapImage.Create(WizardForm);
    bmpPlayButton.Parent := WizardForm;
    bmpPlayButton.ReplaceColor := clBlack;
@@ -1192,7 +1184,7 @@ Type: filesandordirs; Name: {app}
     TaskBarButtonIcon(hMusic, TBIcon[3].Handle);
   end;
 
- procedure DubleOnClick(Sender: TObject);
+ procedure DoubleOnClick(Sender: TObject);
   begin
    case Sender of
     btnLeftButton: WizardForm.CancelButton.OnClick(WizardForm.CancelButton);
@@ -1516,13 +1508,13 @@ Type: filesandordirs; Name: {app}
    WizardForm.Position := poScreenCenter;
    WizardForm.WizardBitmapImage.Parent := WizardForm;
    WizardForm.WizardBitmapImage.SetBounds(WizardForm.ClientWidth / 2 - ScaleX(225), ScaleY(0), ScaleX(450), ScaleY(65));
-   bvlInstallForm := TBevel.Create(WizardForm);
-   bvlInstallForm.SetBounds(ScaleX(10), ScaleY(60), WizardForm.ClientWidth - ScaleX(20), ScaleY(180));
-   bvlInstallForm.Shape := bsBox;
-   bvlInstallForm.Style := bsRaised;
-   bvlInstallForm.Parent := WizardForm;
+   bvlDirectories := TBevel.Create(WizardForm);
+   bvlDirectories.SetBounds(ScaleX(10), ScaleY(60), WizardForm.ClientWidth - ScaleX(20), ScaleY(180));
+   bvlDirectories.Shape := bsBox;
+   bvlDirectories.Style := bsRaised;
+   bvlDirectories.Parent := WizardForm;
    bvlDirInstall := TBevel.Create(WizardForm);
-   bvlDirInstall.SetBounds(bvlInstallForm.Left + ScaleX(10), bvlInstallForm.Top + ScaleY(10), bvlInstallForm.Width - ScaleX(20), ScaleY(75));
+   bvlDirInstall.SetBounds(bvlDirectories.Left + ScaleX(10), bvlDirectories.Top + ScaleY(10), bvlDirectories.Width - ScaleX(20), ScaleY(75));
    bvlDirInstall.Shape := bsBox;
    bvlDirInstall.Style := bsLowered;
    bvlDirInstall.Parent := WizardForm;
@@ -1531,13 +1523,13 @@ Type: filesandordirs; Name: {app}
    bvlIconGroup.Shape := bsBox;
    bvlIconGroup.Style := bsLowered;
    bvlIconGroup.Parent := WizardForm;
-   bvlOptionsForm := TBevel.Create(WizardForm);
-   bvlOptionsForm.SetBounds(bvlInstallForm.Left, bvlInstallForm.Top + bvlInstallForm.Height + ScaleY(10), bvlInstallForm.Width, bvlDirInstall.Height - ScaleY(7));
-   bvlOptionsForm.Shape := bsBox;
-   bvlOptionsForm.Style := bsLowered;
-   bvlOptionsForm.Parent := WizardForm;
+   bvlOptions := TBevel.Create(WizardForm);
+   bvlOptions.SetBounds(bvlDirectories.Left, bvlDirectories.Top + bvlDirectories.Height + ScaleY(10), bvlDirectories.Width, bvlDirInstall.Height - ScaleY(7));
+   bvlOptions.Shape := bsBox;
+   bvlOptions.Style := bsLowered;
+   bvlOptions.Parent := WizardForm;
    bvlInstallOptions := TBevel.Create(WizardForm);
-   bvlInstallOptions.SetBounds(bvlOptionsForm.Left + ScaleX(10), bvlOptionsForm.Top + ScaleY(10), bvlOptionsForm.Width - ScaleX(20), bvlOptionsForm.Height - ScaleY(20));
+   bvlInstallOptions.SetBounds(bvlOptions.Left + ScaleX(10), bvlOptions.Top + ScaleY(10), bvlOptions.Width - ScaleX(20), bvlOptions.Height - ScaleY(20));
    bvlInstallOptions.Shape := bsBox;
    bvlInstallOptions.Style := bsLowered;
    bvlInstallOptions.Parent := WizardForm;
@@ -1687,25 +1679,25 @@ Type: filesandordirs; Name: {app}
    lblCopyCrack.OnMouseLeave := @LabelCrackOnMouseLeave;
    lblCopyCrack.OnClick := @LabelCrackOnClick;
    if IsCrackTheres then begin
-    bvlOptionsForm.Height := WizardForm.ClientHeight - bvlInstallOptions.Top - chbCopyCrack.Top + chbCopyCrack.Height + ScaleY(55);
-    bvlInstallOptions.Height := bvlOptionsForm.Height - ScaleY(20);
+    bvlOptions.Height := WizardForm.ClientHeight - bvlInstallOptions.Top - chbCopyCrack.Top + chbCopyCrack.Height + ScaleY(55);
+    bvlInstallOptions.Height := bvlOptions.Height - ScaleY(20);
    end
    else begin
     chbCopyCrack.Hide;
     lblCopyCrack.Hide;
    end;
-   bvlButtonForm := TBevel.Create(WizardForm);
-   bvlButtonForm.SetBounds(bvlInstallForm.Left, bvlOptionsForm.Top + bvlOptionsForm.Height + ScaleY(10), bvlInstallForm.Width, ScaleY(50));
-   bvlButtonForm.Shape := bsBox;
-   bvlButtonForm.Style := bsLowered;
-   bvlButtonForm.Parent := WizardForm;
+   bvlButtons := TBevel.Create(WizardForm);
+   bvlButtons.SetBounds(bvlDirectories.Left, bvlOptions.Top + bvlOptions.Height + ScaleY(10), bvlDirectories.Width, ScaleY(50));
+   bvlButtons.Shape := bsBox;
+   bvlButtons.Style := bsLowered;
+   bvlButtons.Parent := WizardForm;
    bvlLeftButton := TBevel.Create(WizardForm);
-   bvlLeftButton.SetBounds(bvlButtonForm.Left + ScaleX(5), bvlButtonForm.Top + ScaleY(5), bvlButtonForm.Width / 2 - ScaleX(8), bvlButtonForm.Height - ScaleY(10));
+   bvlLeftButton.SetBounds(bvlButtons.Left + ScaleX(5), bvlButtons.Top + ScaleY(5), bvlButtons.Width / 2 - ScaleX(8), bvlButtons.Height - ScaleY(10));
    bvlLeftButton.Shape := bsBox;
    bvlLeftButton.Style := bsLowered;
    bvlLeftButton.Parent := WizardForm;
    bvlRightButton := TBevel.Create(WizardForm);
-   bvlRightButton.SetBounds(bvlLeftButton.Left + bvlLeftButton.Width + ScaleX(6), bvlButtonForm.Top + ScaleY(5), bvlButtonForm.Width / 2 - ScaleX(8), bvlButtonForm.Height - ScaleY(10));
+   bvlRightButton.SetBounds(bvlLeftButton.Left + bvlLeftButton.Width + ScaleX(6), bvlButtons.Top + ScaleY(5), bvlButtons.Width / 2 - ScaleX(8), bvlButtons.Height - ScaleY(10));
    bvlRightButton.Shape := bsBox;
    bvlRightButton.Style := bsLowered;
    bvlRightButton.Parent := WizardForm;
@@ -1720,7 +1712,7 @@ Type: filesandordirs; Name: {app}
    btnLeftButton.Font.Name := WizardForm.DirEdit.Font.Name;
    btnLeftButton.Font.Size := 8;
    btnLeftButton.Parent := WizardForm;
-   btnLeftButton.OnClick := @DubleOnClick;
+   btnLeftButton.OnClick := @DoubleOnClick;
    if IsThemeActive then begin
     btnRightButton := TButton.Create(WizardForm); end
    else begin
@@ -1730,9 +1722,9 @@ Type: filesandordirs; Name: {app}
    btnRightButton.Font.Name := WizardForm.DirEdit.Font.Name;
    btnRightButton.Font.Size := 8;
    btnRightButton.Parent := WizardForm;
-   btnRightButton.OnClick := @DubleOnClick;
+   btnRightButton.OnClick := @DoubleOnClick;
    bvlProgressForm := TBevel.Create(WizardForm);
-   bvlProgressForm.SetBounds(bvlInstallForm.Left, bvlButtonForm.Top + bvlButtonForm.Height + ScaleY(10), bvlInstallForm.Width, WizardForm.ClientHeight - bvlButtonForm.Top  - bvlButtonForm.Height - ScaleY(20));
+   bvlProgressForm.SetBounds(bvlDirectories.Left, bvlButtons.Top + bvlButtons.Height + ScaleY(10), bvlDirectories.Width, WizardForm.ClientHeight - bvlButtons.Top  - bvlButtons.Height - ScaleY(20));
    bvlProgressForm.Shape := bsBox;
    bvlProgressForm.Style := bsLowered;
    bvlProgressForm.Parent := WizardForm;
@@ -1870,11 +1862,8 @@ Type: filesandordirs; Name: {app}
 
  procedure CurStepChanged(CurStep: TSetupStep);
   var
-   unused1, unused2: Integer;
-   Comps1, Comps2, Comps3, TmpValue: Cardinal;
-   FindHandle1, ColFiles1, CurIndex1, tmp: Integer;
-   ExecError, ISFailed: Boolean;
-   InFilePath, OutFilePath, OutFileName: PAnsiChar;
+   Comps1, Comps2, Comps3: Cardinal;
+   ExecError: Boolean;
    ArcFileIndex, ArcFileCount: Integer;
    ArcFileName: String;
   begin
@@ -1884,7 +1873,7 @@ Type: filesandordirs; Name: {app}
     ExtractTemporaryFile('unarc.dll');
     ISPaused := False;
     ISDoneError := True;
-    ISFailed := False;
+    ExecError := False;
     ArcFileIndex := 1;
     ArcFileCount := 0;
     while True do begin
@@ -1906,12 +1895,12 @@ Type: filesandordirs; Name: {app}
       while ArcFileIndex <= ArcFileCount do begin
        ArcFileName := ExpandConstant('{src}\setup-' + IntToStr(ArcFileIndex) + '.bin');
        if not ISArcExtract(0, 100 / ArcFileCount, FileSearch(ArcFileName), ExpandConstant('{app}'), '', False, '', '', ExpandConstant('{app}'), False) then begin
-        ISFailed := True;
+        ExecError := True;
         Break;
        end;
        Inc(ArcFileIndex);
       end;
-      if ISFailed then begin
+      if ExecError then begin
        Break;
       end;
       ISDoneError := False;
@@ -1946,7 +1935,7 @@ Type: filesandordirs; Name: {app}
      memProgressLog.Lines.Add(SetupMessage(msgStatusRunProgram));
    if (CurStep = ssPostInstall) and (chbCopyCrack.Checked) and not ISDoneError then begin
     hMutex := CreateMutexA(0, 1, 'WSjuQKBxmd_mut');
-    if IsXCOPY(ExpandConstant('{#Game_CrackDir}'), ExpandConstant('{app}'), 'WpAYr2duAuquv8OF') then
+    if IsXCOPY(ExpandConstant('{#GameCrackDir}'), ExpandConstant('{app}'), 'WpAYr2duAuquv8OF') then
      CrackInstalled := True
     else
      MsgBox(ExpandConstant('{cm:ErrCopy}'), mbConfirmation, MB_OK);
@@ -1955,8 +1944,6 @@ Type: filesandordirs; Name: {app}
   end;
 
  procedure DeinitializeSetup;
-  var
-   unused: LongInt;
   begin
    if bInitDone then begin
     ShowWindow(WizardForm.Handle, SW_HIDE);
