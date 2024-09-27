@@ -1,4 +1,4 @@
-name: Build and Release Example Installer
+name: Build and Release Example Installer for Windows and Linux
 
 concurrency:
   group: "build-release"
@@ -11,7 +11,7 @@ on:
       - '*.md'
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     permissions: write-all
 
