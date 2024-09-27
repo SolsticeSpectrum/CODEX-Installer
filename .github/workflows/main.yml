@@ -87,11 +87,107 @@ jobs:
       run: |
         .\tooling\InnoSetupEE\ISCC.exe .\installer\src\setup.iss
 
+  build-linux:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Wine and necessary dependencies
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo apt-get update
+        sudo apt-get install -y wine64 wine32 gcc-multilib libc6-dev-i386 wget
+        wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+        chmod a+x appimagetool-x86_64.AppImage
+
+    - name: Download Inno Setup
+      run: |
+        wget -q "https://files.jrsoftware.org/is/6/innosetup-6.2.1.exe"
+        wine innosetup-6.2.1.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+
+    - name: Compile installers with Wine
+      run: |
+        compile_installer() {
+          local style=$1
+          local group_name=$2
+          local logo_group=$3
+          local icon_group=$4
+          local music_group=$5
+          local output_name=$6
+
+          sed -i "s/#define Style.*/#define Style           \"$style\"/" installer/src/setup.iss
+          sed -i "s/#define GroupName.*/#define GroupName       \"$group_name\"/" installer/src/setup.iss
+          sed -i "s/#define LogoGroup.*/#define LogoGroup       \"$logo_group\"/" installer/src/setup.iss
+          sed -i "s/#define IconGroup.*/#define IconGroup       \"$icon_group\"/" installer/src/setup.iss
+          sed -i "s/#define MusicGroup.*/#define MusicGroup       \"$music_group\"/" installer/src/setup.iss
+          sed -i "s/#define OutputName.*/#define OutputName      \"$output_name\"/" installer/src/setup.iss
+
+          wine "$HOME/.wine/drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe" installer/src/setup.iss
+        }
+
+        compile_installer "CODEX" "CODEX" "5" "1" "1" "codex"
+        compile_installer "PLAZA" "PLAZA" "7" "2" "2" "plaza"
+        compile_installer "RUNE" "RUNE" "8" "3" "3" "rune"
+        compile_installer "Amakrits" "ENDEREX" "9" "4" "4" "enderex"
+
+    - name: Create AppImages
+      run: |
+        create_appimage() {
+          local installer_name=$1
+          mkdir -p AppDir
+          cp installer/src/DISTRIBUTABLE/$installer_name.exe AppDir/
+          cat > AppDir/AppRun <<EOL
+        #!/bin/sh
+        wine "\${APPDIR}/$installer_name.exe" "\$@"
+        EOL
+          chmod +x AppDir/AppRun
+          ./appimagetool-x86_64.AppImage AppDir ${installer_name}_linux.AppImage
+          rm -rf AppDir
+        }
+
+        create_appimage codex
+        create_appimage plaza
+        create_appimage rune
+        create_appimage enderex
+
+    - name: Upload Linux AppImages
+      uses: actions/upload-artifact@v2
+      with:
+        name: linux-appimages
+        path: ./*.AppImage
+
+  create-release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download Windows Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: windows-installers
+        path: windows-installers
+
+    - name: Download Linux Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: linux-appimages
+        path: linux-appimages
+
     - name: Create GitHub Release
       uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
+        prerelease: false
+        title: "Latest Example Preview"
+        files: |
+          windows-installers/*.exe
+          linux-appimages/*.AppImage
         prerelease: false
         title: "Latest Example Preview"
         files: ./installer/src/DISTRIBUTABLE/*.exe
