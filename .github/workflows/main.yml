@@ -104,7 +104,7 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
-        sudo apt-get install -y wine64 wine32 gcc-multilib libc6-dev-i386
+        sudo apt-get install -y wine64 wine32 gcc-multilib libc6-dev-i386 libfuse2
         wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
         chmod a+x appimagetool-x86_64.AppImage
 
