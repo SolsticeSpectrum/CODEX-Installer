@@ -87,6 +87,12 @@ jobs:
       run: |
         .\tooling\InnoSetupEE\ISCC.exe .\installer\src\setup.iss
 
+    - name: Upload Windows Installers
+      uses: actions/upload-artifact@v2
+      with:
+        name: windows-installers
+        path: ./installer/src/DISTRIBUTABLE/*.exe
+
   build-linux:
     runs-on: ubuntu-latest
     permissions: write-all
