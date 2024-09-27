@@ -194,6 +194,3 @@ jobs:
         files: |
           windows-installers/*.exe
           linux-appimages/*.AppImage
-        prerelease: false
-        title: "Latest Example Preview"
-        files: ./installer/src/DISTRIBUTABLE/*.exe
