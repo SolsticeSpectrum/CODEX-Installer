@@ -155,10 +155,11 @@ jobs:
         Categories=Utility;
         EOL
 
-          # Use a generic icon (you may want to replace this with a custom icon later)
+          # Use the specified icon
           wget -O AppDir/wineglass.png http://test.winehq.org/tests/winehq_snapshot/index_files/winehq_logo_glass.png
           
-          ./appimagetool-x86_64.AppImage AppDir ${installer_name}_linux.AppImage
+          # Use ARCH environment variable when calling appimagetool
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage AppDir ${installer_name}_linux.AppImage
           rm -rf AppDir
         }
 
@@ -166,6 +167,12 @@ jobs:
         create_appimage plaza
         create_appimage rune
         create_appimage enderex
+
+    - name: Upload Linux AppImages
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-appimages
+        path: ./*.AppImage
 
   create-release:
     needs: [build-windows, build-linux]
