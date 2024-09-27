@@ -100,7 +100,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install Wine and necessary dependencies
+    - name: Install Wine and dependencies
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
@@ -144,8 +144,6 @@ jobs:
         wine "\${APPDIR}/$installer_name.exe" "\$@"
         EOL
           chmod +x AppDir/AppRun
-          
-          # Create a basic .desktop file
           cat > AppDir/$installer_name.desktop <<EOL
         [Desktop Entry]
         Name=$installer_name Installer
@@ -154,11 +152,7 @@ jobs:
         Type=Application
         Categories=Utility;
         EOL
-
-          # Use the specified icon
           wget -O AppDir/wineglass.png http://test.winehq.org/tests/winehq_snapshot/index_files/winehq_logo_glass.png
-          
-          # Use ARCH environment variable when calling appimagetool
           ARCH=x86_64 ./appimagetool-x86_64.AppImage AppDir ${installer_name}_linux.AppImage
           rm -rf AppDir
         }
