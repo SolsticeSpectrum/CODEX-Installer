@@ -201,11 +201,52 @@ def _read_font_table(data: bytes, pos: int) -> tuple[dict[str, dict], int]:
     return fonts, pos
 
 
-def parse_vsf(path: Path | str) -> dict[str, Any]:
+def _extract_bitmap(data: bytes, pos: int) -> tuple[dict[str, Any], int]:
+    """Extract a single TseBitmap from the stream.
+
+    Format: ReadString(name), int32 W, int32 H, W*H*4 bytes BGRA (bottom-up).
+    Then 1 byte transparent flag, 1 byte alpha flag.
+    """
+    from PIL import Image
+
+    bmp_name, pos = read_delphi_string(data, pos)
+    w = struct.unpack_from("<i", data, pos)[0]
+    pos += 4
+    h = struct.unpack_from("<i", data, pos)[0]
+    pos += 4
+
+    info: dict[str, Any] = {"name": bmp_name, "width": w, "height": h}
+
+    pixel_bytes = w * h * 4
+    if h > 0 and w > 0:
+        raw_pixels = data[pos : pos + pixel_bytes]
+        pos += pixel_bytes
+        # Bottom-up BGRA to top-down RGBA
+        img = Image.frombytes("RGBA", (w, h), raw_pixels, "raw", "BGRA", 0, -1)
+        info["image"] = img
+    else:
+        pos += pixel_bytes
+
+    transparent = struct.unpack_from("<?", data, pos)[0]
+    pos += 1
+    alpha = struct.unpack_from("<?", data, pos)[0]
+    pos += 1
+    info["transparent"] = transparent
+    info["alpha"] = alpha
+
+    return info, pos
+
+
+def parse_vsf(
+    path: Path | str,
+    *,
+    extract_bitmaps: bool = False,
+    extract_objects: bool = False,
+) -> dict[str, Any]:
     """Parse a VCL Style (.vsf) file and return structured theme data.
 
     Returns a dict with keys: name, version, author, author_email,
-    author_url, colors, sys_colors, fonts, bitmaps (metadata only).
+    author_url, colors, sys_colors, fonts, bitmaps.
     """
     path = Path(path)
     raw = path.read_bytes()
@@ -226,21 +267,25 @@ def parse_vsf(path: Path | str) -> dict[str, Any]:
     if display_names_size > 0:
         pos += display_names_size
 
-    # 3. Bitmaps - skip pixel data, record metadata
+    # 3. Bitmaps
     bitmap_count = struct.unpack_from("<i", data, pos)[0]
     pos += 4
     bitmap_info: list[dict[str, Any]] = []
     for i in range(bitmap_count):
-        # TseBitmap: ReadString(name), int32 W, int32 H, W*H*4 BGRA pixels
-        bmp_name, pos = read_delphi_string(data, pos)
-        w = struct.unpack_from("<i", data, pos)[0]
-        pos += 4
-        h = struct.unpack_from("<i", data, pos)[0]
-        pos += 4
-        pos += w * h * 4  # skip pixel data
-        pos += 1  # transparent flag
-        pos += 1  # alpha flag
-        bitmap_info.append({"name": bmp_name, "width": w, "height": h, "index": i})
+        if extract_bitmaps:
+            bmp, pos = _extract_bitmap(data, pos)
+            bmp["index"] = i
+            bitmap_info.append(bmp)
+        else:
+            bmp_name, pos = read_delphi_string(data, pos)
+            w = struct.unpack_from("<i", data, pos)[0]
+            pos += 4
+            h = struct.unpack_from("<i", data, pos)[0]
+            pos += 4
+            pos += w * h * 4
+            pos += 1  # transparent flag
+            pos += 1  # alpha flag
+            bitmap_info.append({"name": bmp_name, "width": w, "height": h, "index": i})
 
     # 4. Style objects - skip DFM data for now
     object_count = struct.unpack_from("<i", data, pos)[0]

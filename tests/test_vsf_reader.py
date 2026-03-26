@@ -100,3 +100,21 @@ def test_parse_vsf_codex_sys_colors():
     sys_colors = result["sys_colors"]
     assert "clWindowText" in sys_colors
     assert "clBtnFace" in sys_colors
+
+
+@pytest.mark.skipif(
+    not (STYLE_DIR / "CODEX.vsf").exists(),
+    reason="CODEX.vsf not found",
+)
+def test_parse_vsf_codex_bitmaps():
+    from PIL import Image
+
+    result = parse_vsf(STYLE_DIR / "CODEX.vsf", extract_bitmaps=True)
+    bitmaps = result["bitmaps"]
+    assert len(bitmaps) >= 1
+    first = bitmaps[0]
+    assert "image" in first
+    img = first["image"]
+    assert isinstance(img, Image.Image)
+    assert img.width > 0
+    assert img.height > 0
