@@ -287,13 +287,27 @@ def parse_vsf(
             pos += 1  # alpha flag
             bitmap_info.append({"name": bmp_name, "width": w, "height": h, "index": i})
 
-    # 4. Style objects - skip DFM data for now
+    # 4. Style objects
     object_count = struct.unpack_from("<i", data, pos)[0]
     pos += 4
+    style_objects: list[dict[str, Any]] = []
     for _ in range(object_count):
-        _class_name, pos = read_delphi_string(data, pos)
+        class_name, pos = read_delphi_string(data, pos)
         obj_size = struct.unpack_from("<I", data, pos)[0]
         pos += 4
+        if extract_objects:
+            obj_data = data[pos : pos + obj_size]
+            try:
+                from .delphi_dfm import parse_dfm_binary
+                obj = parse_dfm_binary(obj_data)
+                obj["_style_class"] = class_name
+                style_objects.append(obj)
+            except Exception as e:
+                style_objects.append({
+                    "_style_class": class_name,
+                    "_parse_error": str(e),
+                    "_raw_size": obj_size,
+                })
         pos += obj_size
 
     # 5. Colors
@@ -320,6 +334,7 @@ def parse_vsf(
         "author_email": author_email,
         "author_url": author_url,
         "bitmaps": bitmap_info,
+        "objects": style_objects if extract_objects else [],
         "colors": colors,
         "sys_colors": sys_colors,
         "fonts": fonts,

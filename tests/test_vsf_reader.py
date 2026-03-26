@@ -118,3 +118,19 @@ def test_parse_vsf_codex_bitmaps():
     assert isinstance(img, Image.Image)
     assert img.width > 0
     assert img.height > 0
+
+
+@pytest.mark.skipif(
+    not (STYLE_DIR / "CODEX.vsf").exists(),
+    reason="CODEX.vsf not found",
+)
+def test_parse_vsf_codex_objects():
+    result = parse_vsf(STYLE_DIR / "CODEX.vsf", extract_objects=True)
+    objects = result["objects"]
+    assert len(objects) > 0
+    # Check that objects have class info
+    names = [o.get("_name", "") for o in objects]
+    assert any(names), f"No named objects found"
+    # Check no parse errors
+    errors = [o for o in objects if "_parse_error" in o]
+    assert len(errors) == 0, f"Parse errors: {errors}"
