@@ -9,4 +9,5 @@ tooling/InnoUnp/Setup/
 tooling/InnoUnp/*.exe
 !tooling/InnoUnp/Unp/43.exe
 
-tooling/UltraARC/_Compression.log
+tooling/UltraARC/_Compression.log__pycache__/
+*.pyc
