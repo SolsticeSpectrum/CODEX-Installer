@@ -41,3 +41,62 @@ def test_parse_vsf_header_invalid():
     data = b"NOT_A_VSF_FILE"
     with pytest.raises(ValueError, match="Not a VCL_STYLE 1.0 file"):
         parse_vsf_header(data)
+
+
+# --- Real file tests ---
+
+from pathlib import Path
+from vsf_parser.vsf_reader import parse_vsf
+
+STYLE_DIR = Path(__file__).parent.parent / "installer" / "src" / "Include" / "Style"
+
+
+@pytest.mark.skipif(
+    not (STYLE_DIR / "CODEX.vsf").exists(),
+    reason="CODEX.vsf not found",
+)
+def test_parse_vsf_codex_metadata():
+    result = parse_vsf(STYLE_DIR / "CODEX.vsf")
+    assert result["name"] != ""
+    assert isinstance(result["version"], str)
+    assert isinstance(result["author"], str)
+
+
+@pytest.mark.skipif(
+    not (STYLE_DIR / "CODEX.vsf").exists(),
+    reason="CODEX.vsf not found",
+)
+def test_parse_vsf_codex_colors():
+    result = parse_vsf(STYLE_DIR / "CODEX.vsf")
+    colors = result["colors"]
+    assert "ktcBorder" in colors
+    assert "ktcButton" in colors
+    assert "ktcWindow" in colors
+    for name, value in colors.items():
+        assert value.startswith("#") or value.startswith("cl"), \
+            f"Color {name} has unexpected format: {value}"
+
+
+@pytest.mark.skipif(
+    not (STYLE_DIR / "CODEX.vsf").exists(),
+    reason="CODEX.vsf not found",
+)
+def test_parse_vsf_codex_fonts():
+    result = parse_vsf(STYLE_DIR / "CODEX.vsf")
+    fonts = result["fonts"]
+    assert "ktfButtonTextNormal" in fonts
+    btn_font = fonts["ktfButtonTextNormal"]
+    assert "name" in btn_font
+    assert "size" in btn_font
+    assert "color" in btn_font
+
+
+@pytest.mark.skipif(
+    not (STYLE_DIR / "CODEX.vsf").exists(),
+    reason="CODEX.vsf not found",
+)
+def test_parse_vsf_codex_sys_colors():
+    result = parse_vsf(STYLE_DIR / "CODEX.vsf")
+    sys_colors = result["sys_colors"]
+    assert "clWindowText" in sys_colors
+    assert "clBtnFace" in sys_colors
