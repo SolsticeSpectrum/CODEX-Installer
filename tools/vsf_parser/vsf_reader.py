@@ -201,6 +201,82 @@ def _read_font_table(data: bytes, pos: int) -> tuple[dict[str, dict], int]:
     return fonts, pos
 
 
+NEW_OBJECT_FORMAT_FLAG = 0xF0000
+
+
+def _parse_style_children(blob: bytes) -> list[dict[str, Any]]:
+    """Parse the 'Objects' binary property from a VCL style object.
+
+    Format (from TSeStyleObject.ReadData in StyleAPI.inc):
+      int32 (count | $F0000)  -- count with new-format flag
+      for each child:
+        ReadString(className)  -- Delphi UTF-16LE length-prefixed string
+        uint32 dfm_size
+        dfm_size bytes of TPF0 data
+
+    This is the same format as top-level style objects in the VSF stream,
+    and is recursive (children can have their own Objects property).
+    """
+    from .delphi_dfm import parse_dfm_binary
+
+    pos = 0
+    raw_count = struct.unpack_from("<i", blob, pos)[0]
+    pos += 4
+
+    # Check new format flag
+    if raw_count & NEW_OBJECT_FORMAT_FLAG == NEW_OBJECT_FORMAT_FLAG:
+        count = raw_count & ~NEW_OBJECT_FORMAT_FLAG
+    else:
+        count = raw_count
+
+    children = []
+    for _ in range(count):
+        if pos >= len(blob):
+            break
+        class_name, pos = read_delphi_string(blob, pos)
+        if pos + 4 > len(blob):
+            break
+        dfm_size = struct.unpack_from("<I", blob, pos)[0]
+        pos += 4
+        if pos + dfm_size > len(blob):
+            break
+        dfm_data = blob[pos : pos + dfm_size]
+        pos += dfm_size
+
+        try:
+            obj = parse_dfm_binary(dfm_data)
+            obj["_style_class"] = class_name
+            # Recursively parse any 'Objects' binary property in children
+            _expand_objects_property(obj)
+            children.append(obj)
+        except Exception as e:
+            children.append({
+                "_style_class": class_name,
+                "_parse_error": str(e),
+                "_raw_size": dfm_size,
+            })
+
+    return children
+
+
+def _expand_objects_property(obj: dict[str, Any]) -> None:
+    """Recursively expand 'Objects' binary properties into parsed children."""
+    if "Objects" in obj and isinstance(obj["Objects"], bytes):
+        blob = obj["Objects"]
+        if len(blob) >= 4:
+            try:
+                parsed_children = _parse_style_children(blob)
+                obj["_children"] = parsed_children
+                del obj["Objects"]  # Remove raw blob
+            except Exception:
+                pass  # Keep raw blob if parsing fails
+
+    # Also recurse into any already-parsed children
+    if "_children" in obj:
+        for child in obj["_children"]:
+            _expand_objects_property(child)
+
+
 def _extract_bitmap(data: bytes, pos: int) -> tuple[dict[str, Any], int]:
     """Extract a single TseBitmap from the stream.
 
@@ -301,6 +377,8 @@ def parse_vsf(
                 from .delphi_dfm import parse_dfm_binary
                 obj = parse_dfm_binary(obj_data)
                 obj["_style_class"] = class_name
+                # Recursively expand nested Objects properties
+                _expand_objects_property(obj)
                 style_objects.append(obj)
             except Exception as e:
                 style_objects.append({
