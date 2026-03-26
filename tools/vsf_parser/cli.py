@@ -64,27 +64,26 @@ def cmd_parse(args: argparse.Namespace) -> None:
     json_path.write_text(json.dumps(serializable, indent=2))
     print(f"Wrote {json_path}")
 
-    # Save bitmaps as PNGs
+    # Generate QSS with atlas-based bitmap slicing
     if not args.json_only:
         assets_dir = output_dir / "assets"
         assets_dir.mkdir(exist_ok=True)
+
+        # Get the atlas image (first bitmap)
+        atlas = None
         for bmp in result["bitmaps"]:
             img = bmp.get("image")
             if img:
-                png_name = bmp["name"]
-                if not png_name.endswith(".png"):
-                    png_name += ".png"
-                png_path = assets_dir / png_name
-                img.save(png_path)
-                print(f"Wrote {png_path} ({img.width}x{img.height})")
+                atlas = img
+                break
 
-        # Generate QSS
         from .qss_generator import generate_qss
 
         qss_path = output_dir / "style.qss"
-        qss_content = generate_qss(serializable, assets_dir)
+        qss_content = generate_qss(serializable, assets_dir, atlas=atlas)
         qss_path.write_text(qss_content)
         print(f"Wrote {qss_path}")
+        print(f"Assets: {len(list(assets_dir.glob('*.png')))} PNGs")
 
 
 def cmd_parse_all(args: argparse.Namespace) -> None:

@@ -1,0 +1,218 @@
+{
+  "WizardBitmapImage": {
+    "x": 16,
+    "y": 0,
+    "w": 450,
+    "h": 65
+  },
+  "bvlDirectories": {
+    "x": 10,
+    "y": 60,
+    "w": 462,
+    "h": 180
+  },
+  "bvlDirInstall": {
+    "x": 20,
+    "y": 70,
+    "w": 442,
+    "h": 75
+  },
+  "bvlIconGroup": {
+    "x": 20,
+    "y": 155,
+    "w": 442,
+    "h": 75
+  },
+  "bvlOptions": {
+    "x": 10,
+    "y": 250,
+    "w": 462,
+    "h": 68
+  },
+  "bvlInstallOptions": {
+    "x": 20,
+    "y": 260,
+    "w": 442,
+    "h": 48
+  },
+  "DirEdit": {
+    "x": 75,
+    "y": 95,
+    "w": 292,
+    "h": 21
+  },
+  "btnDirBrowse": {
+    "x": 372,
+    "y": 94,
+    "w": 80,
+    "h": 23
+  },
+  "lblDirInstall": {
+    "x": 30,
+    "y": 75,
+    "w": 422,
+    "h": 15
+  },
+  "cbxDrive": {
+    "x": 30,
+    "y": 95,
+    "w": 40,
+    "h": 21
+  },
+  "chbDesktopIcon": {
+    "x": 29,
+    "y": 121,
+    "w": 15,
+    "h": 15
+  },
+  "lblDesktopIcon": {
+    "x": 46,
+    "y": 122,
+    "w": 402,
+    "h": 15
+  },
+  "GroupEdit": {
+    "x": 30,
+    "y": 180,
+    "w": 337,
+    "h": 21
+  },
+  "btnGroupBrowse": {
+    "x": 372,
+    "y": 179,
+    "w": 80,
+    "h": 23
+  },
+  "lblGroupDir": {
+    "x": 30,
+    "y": 160,
+    "w": 422,
+    "h": 15
+  },
+  "chbCreateGroup": {
+    "x": 29,
+    "y": 206,
+    "w": 15,
+    "h": 15
+  },
+  "lblCreateGroup": {
+    "x": 46,
+    "y": 207,
+    "w": 402,
+    "h": 15
+  },
+  "lblDiskSizeNeeded": {
+    "x": 30,
+    "y": 265,
+    "w": 15,
+    "h": 15
+  },
+  "chbNoUninstaller": {
+    "x": 29,
+    "y": 285,
+    "w": 15,
+    "h": 15
+  },
+  "lblNoUninstaller": {
+    "x": 46,
+    "y": 286,
+    "w": 350,
+    "h": 15
+  },
+  "chbCopyCrack": {
+    "x": 29,
+    "y": 305,
+    "w": 15,
+    "h": 15
+  },
+  "lblCopyCrack": {
+    "x": 46,
+    "y": 306,
+    "w": 350,
+    "h": 15
+  },
+  "bvlButtons": {
+    "x": 10,
+    "y": 328,
+    "w": 462,
+    "h": 50
+  },
+  "bvlLeftButton": {
+    "x": 15,
+    "y": 333,
+    "w": 223,
+    "h": 40
+  },
+  "bvlRightButton": {
+    "x": 244,
+    "y": 333,
+    "w": 223,
+    "h": 40
+  },
+  "btnLeftButton": {
+    "x": 20,
+    "y": 338,
+    "w": 213,
+    "h": 30
+  },
+  "btnRightButton": {
+    "x": 249,
+    "y": 338,
+    "w": 213,
+    "h": 30
+  },
+  "bvlProgressForm": {
+    "x": 10,
+    "y": 388,
+    "w": 462,
+    "h": 185
+  },
+  "bvlProgressGauge": {
+    "x": 20,
+    "y": 398,
+    "w": 442,
+    "h": 165
+  },
+  "ProgressGauge": {
+    "x": 30,
+    "y": 408,
+    "w": 422,
+    "h": 15
+  },
+  "memProgressLog": {
+    "x": 31,
+    "y": 428,
+    "w": 420,
+    "h": 125
+  },
+  "lblInstallResult": {
+    "x": 0,
+    "y": 578,
+    "w": 482,
+    "h": 30
+  },
+  "bmpPauseButton": {
+    "x": 446,
+    "y": 267,
+    "w": 11,
+    "h": 11
+  },
+  "bmpPlayButton": {
+    "x": 433,
+    "y": 267,
+    "w": 11,
+    "h": 11
+  },
+  "bmpTrackBar": {
+    "x": 368,
+    "y": 271,
+    "w": 60,
+    "h": 3
+  },
+  "bmpTrackButton": {
+    "x": 398,
+    "y": 268,
+    "w": 8,
+    "h": 9
+  }
+}

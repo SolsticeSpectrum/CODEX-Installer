@@ -11,3 +11,5 @@ tooling/InnoUnp/*.exe
 
 tooling/UltraARC/_Compression.log__pycache__/
 *.pyc
+app/build/
+app/assets_data.h
