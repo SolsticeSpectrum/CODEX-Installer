@@ -1,0 +1,82 @@
+FROM ubuntu:22.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    build-essential cmake pkg-config wget xxd \
+    libfreetype-dev libharfbuzz-dev libpng-dev zlib1g-dev \
+    libbz2-dev libbrotli-dev libgraphite2-dev \
+    libglib2.0-dev libpcre2-dev \
+    libasound2-dev libpulse-dev \
+    libx11-dev libxext-dev libxrandr-dev libxcursor-dev \
+    libxi-dev libxfixes-dev libxss-dev \
+    libwayland-dev wayland-protocols libxkbcommon-dev \
+    libdrm-dev libegl-dev libgles-dev libgbm-dev \
+    libudev-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /deps
+
+# Build SDL2 static
+RUN wget -q https://github.com/libsdl-org/SDL/releases/download/release-2.30.12/SDL2-2.30.12.tar.gz && \
+    tar xzf SDL2-2.30.12.tar.gz && cd SDL2-2.30.12 && mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=/deps/sdl2 -DSDL_PIPEWIRE=OFF && \
+    make -j$(nproc) && make install
+
+# Build SDL2_image static (PNG only)
+RUN wget -q https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.8/SDL2_image-2.8.8.tar.gz && \
+    tar xzf SDL2_image-2.8.8.tar.gz && cd SDL2_image-2.8.8 && mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=/deps/sdl2 -DCMAKE_PREFIX_PATH=/deps/sdl2 \
+      -DSDL2IMAGE_JPG=OFF -DSDL2IMAGE_TIF=OFF -DSDL2IMAGE_WEBP=OFF \
+      -DSDL2IMAGE_JXL=OFF -DSDL2IMAGE_AVIF=OFF && \
+    make -j$(nproc) && make install
+
+# Build SDL2_ttf static
+RUN wget -q https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.24.0/SDL2_ttf-2.24.0.tar.gz && \
+    tar xzf SDL2_ttf-2.24.0.tar.gz && cd SDL2_ttf-2.24.0 && mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=/deps/sdl2 -DCMAKE_PREFIX_PATH=/deps/sdl2 && \
+    make -j$(nproc) && make install
+
+# Build SDL2_mixer static (OGG via stb_vorbis)
+RUN wget -q https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-2.8.1.tar.gz && \
+    tar xzf SDL2_mixer-2.8.1.tar.gz && cd SDL2_mixer-2.8.1 && mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=/deps/sdl2 -DCMAKE_PREFIX_PATH=/deps/sdl2 \
+      -DSDL2MIXER_FLAC=OFF -DSDL2MIXER_MOD=OFF -DSDL2MIXER_MP3=OFF \
+      -DSDL2MIXER_MIDI=OFF -DSDL2MIXER_OPUS=OFF -DSDL2MIXER_WAVPACK=OFF \
+      -DSDL2MIXER_VORBIS=STB && \
+    make -j$(nproc) && make install
+
+# Build the installer
+WORKDIR /src
+COPY main.cpp VclRenderer.cpp VclRenderer.h InstallerWindow.cpp InstallerWindow.h \
+     json.hpp miniz.c miniz.h assets_data.h ./
+
+RUN gcc -c -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 miniz.c -o miniz.o && \
+    g++ -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -o codex-installer \
+    main.cpp VclRenderer.cpp InstallerWindow.cpp miniz.o \
+    -I/deps/sdl2/include/SDL2 -I/deps/sdl2/include \
+    -Wl,--start-group \
+    /deps/sdl2/lib/libSDL2_image.a \
+    /deps/sdl2/lib/libSDL2_mixer.a \
+    /deps/sdl2/lib/libSDL2_ttf.a \
+    /deps/sdl2/lib/libSDL2main.a \
+    /deps/sdl2/lib/libSDL2.a \
+    -lfreetype -lharfbuzz -lgraphite2 -lpng16 -lz -lbz2 \
+    -lbrotlidec -lbrotlicommon \
+    -lglib-2.0 -lpcre2-8 \
+    -lwayland-client -lwayland-egl -lwayland-cursor -lxkbcommon \
+    -ldrm -lEGL -lGLESv2 -lgbm \
+    -lX11 -lXext -lXrandr -lXcursor -lXi -lXfixes -lXss \
+    -lasound -lpulse -lpulse-simple \
+    -ludev \
+    -lm -ldl -lpthread -lrt \
+    -Wl,--end-group \
+    -std=c++17 && \
+    strip codex-installer && \
+    ls -lh codex-installer
+
+FROM scratch
+COPY --from=builder /src/codex-installer /codex-installer

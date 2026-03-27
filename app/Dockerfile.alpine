@@ -1,0 +1,25 @@
+FROM alpine:3.21 AS builder
+
+RUN apk add --no-cache \
+    build-base cmake pkgconf linux-headers wget \
+    sdl2-dev sdl2_image-dev sdl2_ttf-dev sdl2_mixer-dev \
+    freetype-dev harfbuzz-dev libpng-dev zlib-dev bzip2-dev \
+    brotli-dev graphite2-dev glib-dev pcre2-dev
+
+WORKDIR /src
+COPY main.cpp VclRenderer.cpp VclRenderer.h InstallerWindow.cpp InstallerWindow.h \
+     json.hpp miniz.c miniz.h assets_data.h ./
+
+RUN gcc -c -O2 miniz.c -o miniz.o && \
+    g++ -O2 -o codex-installer \
+    main.cpp VclRenderer.cpp InstallerWindow.cpp miniz.o \
+    $(pkg-config --cflags sdl2 SDL2_image SDL2_ttf SDL2_mixer) \
+    $(pkg-config --libs sdl2 SDL2_image SDL2_ttf SDL2_mixer) \
+    -lfreetype -lharfbuzz -lpng16 -lz \
+    -lm -ldl -lpthread \
+    -std=c++17 && \
+    strip codex-installer && \
+    ls -lh codex-installer
+
+FROM scratch
+COPY --from=builder /src/codex-installer /codex-installer
