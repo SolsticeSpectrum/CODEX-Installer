@@ -165,7 +165,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
 
     auto capRightObj = FStyleSource.FindChild(
         FStyleSource.GetObjectByName("Form/Image/Title/Caption/sysButtons"), "CaptionRight");
-    int capRightW    = FStyleSource.GetInt(capRightObj, "Width", 5);
+    int capRightW    = FStyleSource.GetInt(capRightObj, "Width", FBorderR - 1);
     int rightEdge    = sysX + sysW - capRightW;
 
     int closeX = rightEdge - FWndBtnW;
@@ -479,8 +479,13 @@ void TWizardForm::CheckDraw() {
         SDL_Rect r = LayoutRect(name);
         SDL_Texture *t = !enabled ? (checked ? FChkCheckedD : FChkUncheckedD)
                        :  checked ? FChkCheckedN : FChkUncheckedN;
+        if (!t) return;
 
-        if (t) SDL_RenderCopy(FRenderer, t, nullptr, &r);
+        int tw, th;
+        SDL_QueryTexture(t, nullptr, nullptr, &tw, &th);
+        
+        SDL_Rect dst = {r.x + (r.w - tw) / 2, r.y + (r.h - th) / 2, tw, th};
+        SDL_RenderCopy(FRenderer, t, nullptr, &dst);
     };
 
     draw("chbDesktopIcon",  chbCreateDesktopIcon);
