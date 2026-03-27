@@ -165,7 +165,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
 
     auto capRightObj = FStyleSource.FindChild(
         FStyleSource.GetObjectByName("Form/Image/Title/Caption/sysButtons"), "CaptionRight");
-    int capRightW    = FStyleSource.GetInt(capRightObj, "Width", FBorderR - 1);
+    int capRightW    = FStyleSource.GetInt(capRightObj, "Width", 0);
     int rightEdge    = sysX + sysW - capRightW;
 
     int closeX = rightEdge - FWndBtnW;
@@ -185,7 +185,9 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     int capH = FStyleSource.GetInt(captionObj, "Height", 28);
 
     if (FTitleTextAlign == "taCenter") {
-        FTitleTextRect = {0, capY, winW, capH};
+        int ctWidth = FStyleSource.GetInt(capTitle, "Width", 184);
+        FTitleTextRect = {capX, capY,
+                         ctWidth - FTitleTextML - FTitleTextMR, capH};
     } else {
         FTitleTextRect = {iconRight, capY, closeX - iconRight, capH};
     }
