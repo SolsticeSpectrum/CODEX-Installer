@@ -9,7 +9,12 @@ tooling/InnoUnp/Setup/
 tooling/InnoUnp/*.exe
 !tooling/InnoUnp/Unp/43.exe
 
-tooling/UltraARC/_Compression.log__pycache__/
+tooling/UltraARC/_Compression.log
+__pycache__/
+.venv/
 *.pyc
 app/build/
 app/assets_data.h
+linux/app/data/
+linux/app/themes/
+linux/app/build/
