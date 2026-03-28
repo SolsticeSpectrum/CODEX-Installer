@@ -155,7 +155,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     // title bar button layout
     auto captionObj = FStyleSource.GetObjectByName("Form/Image/Title/Caption");
     int capW = FStyleSource.GetInt(captionObj, "Width", 300);
-    int capX = winW - capW;
+    int capX = (winW - FBorderR + 1) - capW;
     int capY = FStyleSource.GetInt(captionObj, "Top", 2);
 
     auto capLeftObj = FStyleSource.FindChild(captionObj, "CaptionLeft");
@@ -163,10 +163,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     int sysX = capX + capLeftW;
     int sysW = capW - capLeftW;
 
-    auto capRightObj = FStyleSource.FindChild(
-        FStyleSource.GetObjectByName("Form/Image/Title/Caption/sysButtons"), "CaptionRight");
-    int capRightW    = FStyleSource.GetInt(capRightObj, "Width", 0);
-    int rightEdge    = sysX + sysW - capRightW;
+    int rightEdge = sysX + sysW;
 
     int closeX = rightEdge - FWndBtnW;
     int minX   = closeX - FWndBtnW;
@@ -181,7 +178,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FTitleTextAlign = FStyleSource.GetString(capTitle, "TextAlign", "taCenter");
 
     auto sysMenuObj = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
-    int iconRight   = FStyleSource.GetInt(sysMenuObj, "Left", 4) + FStyleSource.GetInt(sysMenuObj, "Width", 21) + 2;
+    int iconRight   = FStyleSource.GetInt(sysMenuObj, "Left", 4) + FStyleSource.GetInt(sysMenuObj, "Width", 21);
     int capH = FStyleSource.GetInt(captionObj, "Height", 28);
 
     if (FTitleTextAlign == "taCenter") {
@@ -189,7 +186,11 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
         FTitleTextRect = {capX, capY,
                          ctWidth - FTitleTextML - FTitleTextMR, capH};
     } else {
-        FTitleTextRect = {iconRight, capY, closeX - iconRight, capH};
+        auto sysMenuObj = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
+        int smRight = FStyleSource.GetInt(sysMenuObj, "Left", 6) - 1 + FStyleSource.GetInt(sysMenuObj, "Width", 21);
+        int ctTop   = FStyleSource.GetInt(capTitle, "Top", 2);
+        int ctH     = FStyleSource.GetInt(capTitle, "Height", 28);
+        FTitleTextRect = {smRight, ctTop, closeX - smRight, ctH};
     }
 
     // logo + icon
@@ -361,7 +362,7 @@ void TWizardForm::PaintNC() {
     // icon
     if (FIconTex) {
         auto sm = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
-        int smL = 4, smT = FStyleSource.GetInt(sm, "Top", 2);
+        int smL = FStyleSource.GetInt(sm, "Left", 6) - 2, smT = FStyleSource.GetInt(sm, "Top", 2);
         int smW = FStyleSource.GetInt(sm, "Width", 21), smH = FStyleSource.GetInt(sm, "Height", 20);
         SDL_Rect id = {smL + (smW - 16) / 2, smT + (smH - 16) / 2, 16, 16};
         SDL_RenderCopy(FRenderer, FIconTex, nullptr, &id);
