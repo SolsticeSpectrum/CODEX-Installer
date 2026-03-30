@@ -1,6 +1,8 @@
 #include "TWizardForm.h"
 #include "TSeBitmapObject.h"
 #include "DrawStyleEdge.h"
+#include "ISExtractor.h"
+#include "TSelectFolderForm.h"
 #include <fstream>
 
 
@@ -305,7 +307,6 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FMusic = Mix_LoadMUS((assetsDir + "/Music" + musicNum + ".ogg").c_str());
     if (FMusic) Mix_PlayMusic(FMusic, -1);
 
-    LastTick = SDL_GetTicks();
     return true;
 }
 
@@ -325,19 +326,8 @@ void TWizardForm::Run() {
             else HandleEvent(e);
         }
 
-        // TODO: replace with ISExtractor thread callback
-        if (FStep == wpInstalling && !ISPaused) {
-            Uint32 now = SDL_GetTicks();
-            if (now - LastTick >= 50) {
-                LastTick = now;
-                ProgressValue += 5;
-
-                if (ProgressValue % 10 == 0)
-                    LogLines.push_back("Extracting file " + std::to_string(ProgressValue / 10) + " of 100...");
-                if (ProgressValue > 1000)
-                    CurPageChanged(wpFinished);
-            }
-        }
+        if (FStep == wpInstalling)
+            FExtractor.Tick();
 
         SDL_SetRenderDrawColor(FRenderer, 0, 0, 0, 255);
         SDL_RenderClear(FRenderer);
@@ -800,7 +790,7 @@ void TWizardForm::WMMouseUp(int x, int y) {
     if (btnLeftButton.Pressed) {
         btnLeftButton.Pressed = false;
         if (HitTest(x, y, btnLeftButton.Rect)) {
-            if (FStep == wpInstalling) { CurPageChanged(wpSelectDir); LogLines.push_back("Cancelled."); }
+            if (FStep == wpInstalling) { FExtractor.Cancel(); CurPageChanged(wpSelectDir); LogLines.push_back("Cancelled."); }
             else if (FStep == wpFinished) { /* TODO: launch game executable */ }
             else FRunning = false;
         }
@@ -819,15 +809,31 @@ void TWizardForm::WMMouseUp(int x, int y) {
         if (HitTest(x, y, btnPause.Rect)) {
             ISPaused = !ISPaused;
             btnPause.Caption = ISPaused ? "Resume" : "Pause";
+            if (ISPaused) FExtractor.Pause(); else FExtractor.Resume();
         }
     }
 
-    // TODO: open Qt QFileDialog with VCL theme colors + button bitmaps
     if (btnDirBrowse.Pressed) {
         btnDirBrowse.Pressed = false;
+        if (HitTest(x, y, btnDirBrowse.Rect)) {
+            auto bg = FStyleSource.GetSysColor("clBtnFace");
+            auto fg = FStyleSource.GetSysColor("clBtnText");
+            auto wb = FStyleSource.GetSysColor("clWindow");
+            auto wt = FStyleSource.GetSysColor("clWindowText");
+            auto dir = TSelectFolderForm::Execute("Select Install Directory", DirEdit.Text, bg, fg, wb, wt);
+            if (!dir.empty()) DirEdit.Text = dir;
+        }
     }
     if (btnGroupBrowse.Pressed) {
         btnGroupBrowse.Pressed = false;
+        if (HitTest(x, y, btnGroupBrowse.Rect)) {
+            auto bg = FStyleSource.GetSysColor("clBtnFace");
+            auto fg = FStyleSource.GetSysColor("clBtnText");
+            auto wb = FStyleSource.GetSysColor("clWindow");
+            auto wt = FStyleSource.GetSysColor("clWindowText");
+            auto dir = TSelectFolderForm::Execute("Select Start Menu Directory", GroupEdit.Text, bg, fg, wb, wt);
+            if (!dir.empty()) GroupEdit.Text = dir;
+        }
     }
 }
 
@@ -924,10 +930,17 @@ void TWizardForm::CurPageChanged(ISStep step) {
 
         ProgressValue = 0;
         ISPaused = false;
-
         LogLines.clear();
         LogLines.push_back("Extracting files...");
-        LastTick = SDL_GetTicks();
+
+        FExtractor.SetOnProgress([this](int pct, const std::string &file) {
+            ProgressValue = pct;
+            LogLines.push_back(file);
+        });
+        FExtractor.SetOnFinish([this](bool ok) {
+            CurPageChanged(wpFinished);
+        });
+        FExtractor.Start();
 
     } else if (step == wpFinished) {
         btnPause.Visible = false;

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "TSeStyleSource.h"
+#include "ISExtractor.h"
 #include "config.h"
 
 
@@ -102,10 +103,10 @@ private:
     bool     FMinHover   = false;
 
     // progress
-    int      ProgressValue = 0;
-    bool     ISPaused      = false;
-    Uint32   LastTick      = 0;
-    bool     ShowResult    = false;
+    ISExtractor FExtractor;
+    int  ProgressValue = 0;
+    bool ISPaused      = false;
+    bool ShowResult    = false;
 
     // log
     std::vector<std::string> LogLines;

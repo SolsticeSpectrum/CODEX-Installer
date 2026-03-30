@@ -17,6 +17,7 @@ add_executable(installer
     src/DrawStyleEdge.cpp
     src/TWizardForm.cpp
     src/ISExtractor.cpp
+    src/TSelectFolderForm.cpp
     include/miniz.c
 )
 

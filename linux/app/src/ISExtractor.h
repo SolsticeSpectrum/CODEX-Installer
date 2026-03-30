@@ -1,40 +1,45 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <functional>
 #include <atomic>
+#include <cstdint>
 
 
-// TODO: implement actual .bin archive extraction (ISDone.dll equivalent)
+// TODO: replace mockup with actual .bin archive extraction
 // should support: 7z, RAR, ISArc, precomp, srep, xdelta
-// progress callback reports current file + overall percentage
 class ISExtractor {
 public:
     using ProgressCallback = std::function<void(int percent, const std::string &file)>;
+    using FinishCallback   = std::function<void(bool success)>;
 
     void SetSource(const std::string &archivePath);
     void SetTarget(const std::string &installDir);
-    void SetCallback(ProgressCallback cb);
+    void SetOnProgress(ProgressCallback cb);
+    void SetOnFinish(FinishCallback cb);
 
-    // TODO: run extraction in a thread, call callback on progress
     void Start();
     void Pause();
     void Resume();
     void Cancel();
 
+    // call from main loop each frame
+    void Tick();
+
     bool IsRunning() const  { return FRunning; }
-    bool IsFinished() const { return FFinished; }
-    bool HasError() const   { return FError; }
+    bool IsPaused() const   { return FPaused; }
 
 private:
     std::string FArchive;
     std::string FTarget;
-    ProgressCallback FCallback;
+    ProgressCallback FOnProgress;
+    FinishCallback   FOnFinish;
 
-    std::atomic<bool> FRunning  = false;
-    std::atomic<bool> FPaused   = false;
-    std::atomic<bool> FCancelled = false;
-    std::atomic<bool> FFinished = false;
-    std::atomic<bool> FError    = false;
+    std::atomic<bool> FRunning = false;
+    std::atomic<bool> FPaused  = false;
+
+    // mockup state
+    int  FMockProgress = 0;
+    int  FMockFile     = 0;
+    uint32_t FLastTick = 0;
 };
