@@ -1,4 +1,13 @@
-from .stream import read_string
-from .dfm import parse as parse_dfm
-from .colors import read_colors, read_sys_colors, read_fonts
-from .objects import parse_children, expand
+from . import stream
+from . import dfm
+from . import colors
+from . import objects
+from . import bitmaps
+
+__all__ = [
+    'stream',
+    'dfm',
+    'colors',
+    'objects',
+    'bitmaps',
+]

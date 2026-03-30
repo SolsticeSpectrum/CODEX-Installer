@@ -1,9 +1,9 @@
 from __future__ import annotations
 import struct
 
-from .stream import read_string
-from ..utils.convert import bgr_to_rgb, parse_font
-from ..constants import STYLE_COLORS, SYS_COLORS, STYLE_FONTS
+from . import stream
+from ..utils import convert
+from .. import constants
 
 
 # 1-byte enum count, then (name, ":", value) triplets
@@ -14,12 +14,12 @@ def read_colors(data: bytes, pos: int) -> tuple[dict[str, str], int]:
     colors: dict[str, str] = {}
 
     for i in range(count):
-        name, pos  = read_string(data, pos)
-        _,    pos  = read_string(data, pos)  # ":"
-        val,  pos  = read_string(data, pos)
+        name, pos  = stream.read_string(data, pos)
+        _,    pos  = stream.read_string(data, pos)  # ":"
+        val,  pos  = stream.read_string(data, pos)
 
-        if i < len(STYLE_COLORS):
-            colors[STYLE_COLORS[i]] = bgr_to_rgb(val)
+        if i < len(constants.STYLE_COLORS):
+            colors[constants.STYLE_COLORS[i]] = convert.bgr_to_rgb(val)
 
     return colors, pos
 
@@ -32,12 +32,12 @@ def read_sys_colors(data: bytes, pos: int) -> tuple[dict[str, str], int]:
     colors: dict[str, str] = {}
 
     for i in range(count):
-        name, pos = read_string(data, pos)
-        _,    pos = read_string(data, pos)
-        val,  pos = read_string(data, pos)
+        name, pos = stream.read_string(data, pos)
+        _,    pos = stream.read_string(data, pos)
+        val,  pos = stream.read_string(data, pos)
 
-        if i < len(SYS_COLORS):
-            colors[SYS_COLORS[i]] = bgr_to_rgb(val)
+        if i < len(constants.SYS_COLORS):
+            colors[constants.SYS_COLORS[i]] = convert.bgr_to_rgb(val)
 
     return colors, pos
 
@@ -50,11 +50,11 @@ def read_fonts(data: bytes, pos: int) -> tuple[dict[str, dict], int]:
     fonts: dict[str, dict] = {}
 
     for i in range(count):
-        name, pos = read_string(data, pos)
-        _,    pos = read_string(data, pos)
-        val,  pos = read_string(data, pos)
+        name, pos = stream.read_string(data, pos)
+        _,    pos = stream.read_string(data, pos)
+        val,  pos = stream.read_string(data, pos)
 
-        if i < len(STYLE_FONTS):
-            fonts[STYLE_FONTS[i]] = parse_font(val)
+        if i < len(constants.STYLE_FONTS):
+            fonts[constants.STYLE_FONTS[i]] = convert.parse_font(val)
 
     return fonts, pos

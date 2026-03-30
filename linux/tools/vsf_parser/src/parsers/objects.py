@@ -2,9 +2,8 @@ from __future__ import annotations
 import struct
 from typing import Any
 
-from .stream import read_string
-from .dfm import parse as parse_dfm
-from ..constants import OBJECT_FLAG
+from . import stream, dfm
+from .. import constants
 
 
 def parse_children(blob: bytes) -> list[dict[str, Any]]:
@@ -14,8 +13,8 @@ def parse_children(blob: bytes) -> list[dict[str, Any]]:
     pos += 4
 
     # count has $F0000 flag OR'd in for new format
-    if raw & OBJECT_FLAG == OBJECT_FLAG:
-        count = raw & ~OBJECT_FLAG
+    if raw & constants.OBJECT_FLAG == constants.OBJECT_FLAG:
+        count = raw & ~constants.OBJECT_FLAG
     else:
         count = raw
 
@@ -25,7 +24,7 @@ def parse_children(blob: bytes) -> list[dict[str, Any]]:
         if pos >= len(blob):
             break
 
-        class_name, pos = read_string(blob, pos)
+        class_name, pos = stream.read_string(blob, pos)
 
         if pos + 4 > len(blob):
             break
@@ -40,7 +39,7 @@ def parse_children(blob: bytes) -> list[dict[str, Any]]:
         pos += size
 
         try:
-            obj = parse_dfm(dfm_data)
+            obj = dfm.parse(dfm_data)
             obj["_style_class"] = class_name
             expand(obj)
             children.append(obj)

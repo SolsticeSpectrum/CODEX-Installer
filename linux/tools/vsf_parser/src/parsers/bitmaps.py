@@ -2,18 +2,17 @@ from __future__ import annotations
 import struct
 from typing import Any
 
-from .stream import read_string
+from . import stream
+from ..utils import png
 
 
 # name + int32 w + int32 h + w*h*4 BGRA pixels + 2 bool flags
 def extract(data: bytes, pos: int) -> tuple[dict[str, Any], int]:
-    from PIL import Image
-
-    name, pos = read_string(data, pos)
+    name, pos = stream.read_string(data, pos)
 
     w = struct.unpack_from("<i", data, pos)[0]
     pos += 4
-    
+
     h = struct.unpack_from("<i", data, pos)[0]
     pos += 4
 
@@ -23,7 +22,7 @@ def extract(data: bytes, pos: int) -> tuple[dict[str, Any], int]:
     if h > 0 and w > 0:
         raw   = data[pos : pos + pixels]
         pos  += pixels
-        info["image"] = Image.frombytes("RGBA", (w, h), raw, "raw", "BGRA", 0, -1)
+        info["image"] = png.Bitmap.from_bgra(w, h, raw, flip_y=True)
     else:
         pos += pixels
 
@@ -37,7 +36,7 @@ def extract(data: bytes, pos: int) -> tuple[dict[str, Any], int]:
 
 
 def skip(data: bytes, pos: int) -> tuple[dict[str, Any], int]:
-    name, pos = read_string(data, pos)
+    name, pos = stream.read_string(data, pos)
 
     w = struct.unpack_from("<i", data, pos)[0]
     pos += 4

@@ -29,7 +29,7 @@ bool TSeStyleSource::LoadFromFile(SDL_Renderer *renderer, const std::string &the
     m_fonts     = theme["fonts"];
 
     // 9pt ≈ 12px, 8pt ≈ 11px
-    m_labelFont   = TTF_OpenFont((fontsDir + "/Arial_Bold.ttf").c_str(), 12);
+    m_labelFont   = TTF_OpenFont((fontsDir + "/ArialBd.ttf").c_str(), 12);
     m_buttonFont  = TTF_OpenFont((fontsDir + "/tahoma.ttf").c_str(), 11);
     m_captionFont = TTF_OpenFont((fontsDir + "/tahomabd.ttf").c_str(), 11);
 

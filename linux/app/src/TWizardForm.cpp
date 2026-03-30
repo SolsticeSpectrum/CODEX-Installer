@@ -126,6 +126,43 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FStyleSource.GetMargins(cbBtn, FCbBtnML, FCbBtnMT, FCbBtnMR, FCbBtnMB);
     FComboBtnN = load("combobox_button_normal.png");
     FComboBtnH = load("combobox_button_hot.png");
+    FComboBtnP = load("combobox_button_pressed.png");
+    FComboBtnD = load("combobox_button_disabled.png");
+
+    // scrollbar
+    auto svf = FStyleSource.GetObjectByName("ScrollBar/VertFrame");
+    FStyleSource.GetMargins(svf, FSvfML, FSvfMT, FSvfMR, FSvfMB);
+    FScrollVfTex = load("scrollbar_vert_frame_normal.png");
+
+    auto sbBtn = FStyleSource.GetObjectByName("ScrollBar/TopButton");
+    FStyleSource.GetMargins(sbBtn, FSbBtnML, FSbBtnMT, FSbBtnMR, FSbBtnMB);
+    FScrollTopN      = load("scrollbar_top_btn_normal.png");
+    FScrollTopH      = load("scrollbar_top_btn_hot.png");
+    FScrollTopP      = load("scrollbar_top_btn_pressed.png");
+    FScrollTopD      = load("scrollbar_top_btn_disabled.png");
+    FScrollBotN      = load("scrollbar_bottom_btn_normal.png");
+    FScrollBotH      = load("scrollbar_bottom_btn_hot.png");
+    FScrollBotP      = load("scrollbar_bottom_btn_pressed.png");
+    FScrollBotD      = load("scrollbar_bottom_btn_disabled.png");
+    FScrollTopArrowN = load("scrollbar_top_btn_arrow_normal.png");
+    FScrollTopArrowD = load("scrollbar_top_btn_arrow_disabled.png");
+    FScrollBotArrowN = load("scrollbar_bottom_btn_arrow_normal.png");
+    FScrollBotArrowD = load("scrollbar_bottom_btn_arrow_disabled.png");
+
+    auto svSlider = FStyleSource.GetObjectByName("ScrollBar/VertSlider");
+    FStyleSource.GetMargins(svSlider, FStML, FStMT, FStMR, FStMB);
+    FScrollThumbN = load("scrollbar_vert_slider_normal.png");
+    FScrollThumbH = load("scrollbar_vert_slider_hot.png");
+    FScrollThumbP = load("scrollbar_vert_slider_pressed.png");
+
+    // pre-multiplied alpha blend: src + dst*(1-srcA)
+    auto pmBlend = SDL_ComposeCustomBlendMode(
+        SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+        SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
+    if (FScrollTopArrowN) SDL_SetTextureBlendMode(FScrollTopArrowN, pmBlend);
+    if (FScrollTopArrowD) SDL_SetTextureBlendMode(FScrollTopArrowD, pmBlend);
+    if (FScrollBotArrowN) SDL_SetTextureBlendMode(FScrollBotArrowN, pmBlend);
+    if (FScrollBotArrowD) SDL_SetTextureBlendMode(FScrollBotArrowD, pmBlend);
 
     // progressbar
     auto progFrame = FStyleSource.GetObjectByName("ProgressBar/Frame");
@@ -178,19 +215,22 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FTitleTextAlign = FStyleSource.GetString(capTitle, "TextAlign", "taCenter");
 
     auto sysMenuObj = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
-    int iconRight   = FStyleSource.GetInt(sysMenuObj, "Left", 4) + FStyleSource.GetInt(sysMenuObj, "Width", 21);
+    int smLeft      = FStyleSource.GetInt(sysMenuObj, "Left", 6);
+    int smWidth     = FStyleSource.GetInt(sysMenuObj, "Width", 21);
+
+    int ctH  = FStyleSource.GetInt(capTitle, "Height", 28);
     int capH = FStyleSource.GetInt(captionObj, "Height", 28);
+
+    int textY = (capY + ctH >= FTitleH) ? capY : 0;
+    int textH = (capY + ctH >= FTitleH) ? ctH  : FTitleH;
 
     if (FTitleTextAlign == "taCenter") {
         int ctWidth = FStyleSource.GetInt(capTitle, "Width", 184);
-        FTitleTextRect = {capX, capY,
-                         ctWidth - FTitleTextML - FTitleTextMR, capH};
+        FTitleTextRect = {capX, textY,
+                         ctWidth - FTitleTextML - FTitleTextMR, textH};
     } else {
-        auto sysMenuObj = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
-        int smRight = FStyleSource.GetInt(sysMenuObj, "Left", 6) - 1 + FStyleSource.GetInt(sysMenuObj, "Width", 21);
-        int ctTop   = FStyleSource.GetInt(capTitle, "Top", 2);
-        int ctH     = FStyleSource.GetInt(capTitle, "Height", 28);
-        FTitleTextRect = {smRight, ctTop, closeX - smRight, ctH};
+        int smRight = smLeft - 1 + smWidth;
+        FTitleTextRect = {smRight, textY, closeX - smRight, textH};
     }
 
     // logo + icon
@@ -223,10 +263,16 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
         return tex;
     };
 
-    FPlayTex       = loadBmp(assetsDir + "/Play1.bmp");
-    FPauseMusicTex = loadBmp(assetsDir + "/Pause1.bmp");
-    FTrackBgTex    = loadBmp(assetsDir + "/TrackBkg.bmp");
-    FTrackBtnTex   = loadBmp(assetsDir + "/TrackBtn1.bmp");
+    FPlayN      = loadBmp(assetsDir + "/Play1.bmp");
+    FPlayH      = loadBmp(assetsDir + "/Play2.bmp");
+    FPlayP      = loadBmp(assetsDir + "/Play3.bmp");
+    FPauseN     = loadBmp(assetsDir + "/Pause1.bmp");
+    FPauseH     = loadBmp(assetsDir + "/Pause2.bmp");
+    FPauseP     = loadBmp(assetsDir + "/Pause3.bmp");
+    FTrackBgTex = loadBmp(assetsDir + "/TrackBkg.bmp");
+    FTrackBtnN  = loadBmp(assetsDir + "/TrackBtn1.bmp");
+    FTrackBtnH  = loadBmp(assetsDir + "/TrackBtn2.bmp");
+    FTrackBtnP  = loadBmp(assetsDir + "/TrackBtn3.bmp");
 
     // colors
     FClrBorder    = FStyleSource.GetColor("ktcBorder");
@@ -285,7 +331,7 @@ void TWizardForm::Run() {
                 LastTick = now;
                 ProgressValue += 5;
 
-                if (ProgressValue % 100 == 0)
+                if (ProgressValue % 10 == 0)
                     LogLines.push_back("Extracting file " + std::to_string(ProgressValue / 10) + " of 100...");
                 if (ProgressValue > 1000)
                     CurPageChanged(wpFinished);
@@ -441,8 +487,9 @@ void TWizardForm::EditDraw() {
     SDL_Rect cbTextR = {cbFill.x + 2, cbFill.y, cbFill.w - 4, cbFill.h};
     TSeBitmapObject::DrawText(r, FStyleSource.ButtonFont(), FClrEditText, driveText, cbTextR);
 
-    if (FComboBtnN) {
-        TSeBitmapObject::DrawTex(r, FComboBtnN, FCbBtnML, FCbBtnMT, FCbBtnMR, FCbBtnMB, btnR);
+    auto *cbBtnTex = FComboPressed ? FComboBtnP : (FComboHover ? FComboBtnH : FComboBtnN);
+    if (cbBtnTex) {
+        TSeBitmapObject::DrawTex(r, cbBtnTex, FCbBtnML, FCbBtnMT, FCbBtnMR, FCbBtnMB, btnR);
         if (FComboArrowTex) {
             int aw, ah; SDL_QueryTexture(FComboArrowTex, nullptr, nullptr, &aw, &ah);
             SDL_Rect ad = {btnR.x + (btnR.w - aw) / 2, btnR.y + (btnR.h - ah) / 2, aw, ah};
@@ -478,22 +525,24 @@ void TWizardForm::LabelDraw() {
 void TWizardForm::CheckDraw() {
     bool enabled = (FStep == wpSelectDir);
 
-    auto draw = [&](const std::string &name, bool checked) {
+    auto draw = [&](const std::string &name, bool checked, bool hover) {
         SDL_Rect r = LayoutRect(name);
-        SDL_Texture *t = !enabled ? (checked ? FChkCheckedD : FChkUncheckedD)
-                       :  checked ? FChkCheckedN : FChkUncheckedN;
+        SDL_Texture *t;
+        if (!enabled)   t = checked ? FChkCheckedD : FChkUncheckedD;
+        else if (hover) t = checked ? FChkCheckedH : FChkUncheckedH;
+        else            t = checked ? FChkCheckedN : FChkUncheckedN;
         if (!t) return;
 
         int tw, th;
         SDL_QueryTexture(t, nullptr, nullptr, &tw, &th);
-        
+
         SDL_Rect dst = {r.x + (r.w - tw) / 2, r.y + (r.h - th) / 2, tw, th};
         SDL_RenderCopy(FRenderer, t, nullptr, &dst);
     };
 
-    draw("chbDesktopIcon",  chbCreateDesktopIcon);
-    draw("chbCreateGroup",  chbCreateGroup);
-    draw("chbNoUninstaller", chbNoUninstaller);
+    draw("chbDesktopIcon",   chbCreateDesktopIcon,  chbDesktopIconHover);
+    draw("chbCreateGroup",   chbCreateGroup,         chbCreateGroupHover);
+    draw("chbNoUninstaller", chbNoUninstaller,       chbNoUninstallerHover);
 }
 
 
@@ -519,30 +568,103 @@ void TWizardForm::ProgressDraw() {
     TSeBitmapObject::DrawTex(FRenderer, FProgFrameTex, FPfML, FPfMT, FPfMR, FPfMB, r);
 
     if (ProgressValue > 0) {
-        int barW = (r.w - FPfML - FPfMR) * ProgressValue / 1000;
+        int barW = (r.w - 2) * ProgressValue / 1000;
         if (barW > 0) {
-            SDL_Rect barR = {r.x + FPfML, r.y + FPfMT, barW, r.h - FPfMT - FPfMB};
+            SDL_Rect barR = {r.x + 1, r.y + 1, barW, r.h - 2};
             TSeBitmapObject::DrawTex(FRenderer, FProgBarTex, FPbML, FPbMT, FPbMR, FPbMB, barR);
         }
     }
 
     // log
     SDL_Rect logR = LayoutRect("memProgressLog");
+    SDL_Rect logInner = {logR.x + FEdFrameML, logR.y + FEdFrameMT,
+                         logR.w - FEdFrameML - FEdFrameMR, logR.h - FEdFrameMT - FEdFrameMB};
+
+    int scrollW  = 17;
+    int scrollX  = logInner.x + logInner.w - scrollW;
+    SDL_Rect upR = {scrollX, logInner.y, scrollW, scrollW};
+    SDL_Rect dnR = {scrollX, logInner.y + logInner.h - scrollW, scrollW, scrollW};
+
+    TSeBitmapObject::DrawTex(FRenderer, FEditTex, FEdML, FEdMT, FEdMR, FEdMB, logR);
+
+    auto logBg = FStyleSource.GetSysColor("clWindow");
+    SDL_SetRenderDrawColor(FRenderer, logBg.r, logBg.g, logBg.b, 255);
+    SDL_RenderFillRect(FRenderer, &logInner);
+
+    // VertFrame track clipped to scrollbar column
+    SDL_Rect vfR   = {scrollX - FSvfML, upR.y + upR.h,
+                      scrollW + FSvfML + FSvfMR, dnR.y - (upR.y + upR.h)};
+    SDL_Rect clipR = {scrollX, upR.y + upR.h, scrollW, dnR.y - (upR.y + upR.h)};
+
+    SDL_RenderSetClipRect(FRenderer, &clipR);
+
+    TSeBitmapObject::DrawTex(FRenderer, FScrollVfTex, FSvfML, FSvfMT, FSvfMR, FSvfMB, vfR);
+    SDL_RenderSetClipRect(FRenderer, nullptr);
+
+    SDL_Rect textArea = {logInner.x + 1, logInner.y + 1,
+                         logInner.w - scrollW - 2, logInner.h - 2};
     SDL_SetRenderDrawColor(FRenderer, FClrEdit.r, FClrEdit.g, FClrEdit.b, 255);
-    SDL_RenderFillRect(FRenderer, &logR);
-    SDL_SetRenderDrawColor(FRenderer, FClrBorder.r, FClrBorder.g, FClrBorder.b, 255);
-    SDL_RenderDrawRect(FRenderer, &logR);
+    SDL_RenderFillRect(FRenderer, &textArea);
 
-    auto *f = FStyleSource.ButtonFont();
-    if (f) {
-        int lineH = TTF_FontLineSkip(f);
-        int maxLines  = (logR.h - 4) / lineH;
-        int startLine = std::max(0, (int)LogLines.size() - maxLines);
+    // scrollbar state
+    auto *logFont = FStyleSource.ButtonFont();
+    int lineH     = logFont ? TTF_FontLineSkip(logFont) : 14;
+    int maxLines  = (textArea.h - 4) / lineH;
+    int total     = (int)LogLines.size();
+    bool disabled = total <= maxLines;
+    int trackTop  = upR.y + upR.h;
+    int trackH    = dnR.y - trackTop;
 
-        for (int i = startLine; i < (int)LogLines.size(); i++) {
-            int y = logR.y + 2 + (i - startLine) * lineH;
-            SDL_Rect tr = {logR.x + 4, y, logR.w - 8, lineH};
-            TSeBitmapObject::DrawText(FRenderer, f, FClrEditText, LogLines[i], tr);
+    int maxScroll = std::max(0, total - maxLines);
+    if (maxScroll > FLogPrevMax && FLogScroll >= FLogPrevMax && !FLogDragging)
+        FLogScroll = maxScroll;
+    FLogPrevMax = maxScroll;
+    if (FLogScroll > maxScroll) FLogScroll = maxScroll;
+    if (FLogScroll < 0) FLogScroll = 0;
+
+    FLogUpR = upR; FLogDnR = dnR;
+    FLogTrackTop = trackTop; FLogTrackH = trackH;
+    FLogMaxScroll = maxScroll; FLogMaxLines = maxLines;
+
+    // buttons
+    auto *topBtn   = disabled ? FScrollTopD      : (FScrollTopPressed ? FScrollTopP : (FScrollTopHover ? FScrollTopH : FScrollTopN));
+    auto *botBtn   = disabled ? FScrollBotD      : (FScrollBotPressed ? FScrollBotP : (FScrollBotHover ? FScrollBotH : FScrollBotN));
+    auto *topArrow = disabled ? FScrollTopArrowD : FScrollTopArrowN;
+    auto *botArrow = disabled ? FScrollBotArrowD : FScrollBotArrowN;
+
+    TSeBitmapObject::DrawTex(FRenderer, topBtn, FSbBtnML, FSbBtnMT, FSbBtnMR, FSbBtnMB, upR);
+    TSeBitmapObject::DrawTex(FRenderer, botBtn, FSbBtnML, FSbBtnMT, FSbBtnMR, FSbBtnMB, dnR);
+
+    if (topArrow) {
+        int aw, ah; SDL_QueryTexture(topArrow, nullptr, nullptr, &aw, &ah);
+        SDL_Rect d = {upR.x + (upR.w - aw) / 2, upR.y + (upR.h - ah) / 2, aw, ah};
+        SDL_RenderCopy(FRenderer, topArrow, nullptr, &d);
+    }
+    if (botArrow) {
+        int aw, ah; SDL_QueryTexture(botArrow, nullptr, nullptr, &aw, &ah);
+        SDL_Rect d = {dnR.x + (dnR.w - aw) / 2, dnR.y + (dnR.h - ah) / 2, aw, ah};
+        SDL_RenderCopy(FRenderer, botArrow, nullptr, &d);
+    }
+
+    // thumb
+    FLogThumbR = {};
+    if (!disabled && trackH > 0) {
+        int thumbH = std::max(FStMT + FStMB + 4, trackH * maxLines / total);
+        int thumbY = trackTop;
+        if (maxScroll > 0)
+            thumbY += (trackH - thumbH) * FLogScroll / maxScroll;
+
+        FLogThumbR = {scrollX, thumbY, scrollW, thumbH};
+        auto *tex = FLogDragging ? FScrollThumbP : (FLogThumbHover ? FScrollThumbH : FScrollThumbN);
+        TSeBitmapObject::DrawTex(FRenderer, tex, FStML, FStMT, FStMR, FStMB, FLogThumbR);
+    }
+
+    // text
+    if (logFont) {
+        for (int i = 0; i < maxLines && (FLogScroll + i) < total; i++) {
+            int y = textArea.y + 2 + i * lineH;
+            SDL_Rect tr = {textArea.x + 2, y, textArea.w - 4, lineH};
+            TSeBitmapObject::DrawText(FRenderer, logFont, FClrEditText, LogLines[FLogScroll + i], tr);
         }
     }
 }
@@ -551,22 +673,26 @@ void TWizardForm::ProgressDraw() {
 void TWizardForm::AudioDraw() {
     SDL_Rect playR  = LayoutRect("bmpPlayButton");
     SDL_Rect pauseR = LayoutRect("bmpPauseButton");
-    if (FPlayTex)       SDL_RenderCopy(FRenderer, FPlayTex, nullptr, &playR);
-    if (FPauseMusicTex) SDL_RenderCopy(FRenderer, FPauseMusicTex, nullptr, &pauseR);
+
+    auto *playTex  = FPlayPressed  ? FPlayP  : (FPlayHover  ? FPlayH  : FPlayN);
+    auto *pauseTex = FPausePressed ? FPauseP : (FPauseHover ? FPauseH : FPauseN);
+    if (playTex)  SDL_RenderCopy(FRenderer, playTex, nullptr, &playR);
+    if (pauseTex) SDL_RenderCopy(FRenderer, pauseTex, nullptr, &pauseR);
 
     SDL_Rect trackR = LayoutRect("bmpTrackBar");
     if (FTrackBgTex) SDL_RenderCopy(FRenderer, FTrackBgTex, nullptr, &trackR);
 
-    if (FTrackBtnTex) {
+    auto *trkTex = FDraggingVolume ? FTrackBtnP : (FTrackBtnHover ? FTrackBtnH : FTrackBtnN);
+    if (trkTex) {
         int tw, th;
-        SDL_QueryTexture(FTrackBtnTex, nullptr, nullptr, &tw, &th);
+        SDL_QueryTexture(trkTex, nullptr, nullptr, &tw, &th);
 
         int range  = trackR.w - tw;
         int thumbX = trackR.x + (int)(FVolume * range);
         int thumbY = trackR.y + (trackR.h - th) / 2;
 
         SDL_Rect tbR = {thumbX, thumbY, tw, th};
-        SDL_RenderCopy(FRenderer, FTrackBtnTex, nullptr, &tbR);
+        SDL_RenderCopy(FRenderer, trkTex, nullptr, &tbR);
     }
 }
 
@@ -585,6 +711,13 @@ void TWizardForm::HandleEvent(const SDL_Event &e) {
         case SDL_MOUSEBUTTONDOWN: if (e.button.button == SDL_BUTTON_LEFT) WMMouseDown(e.button.x, e.button.y); break;
         case SDL_MOUSEBUTTONUP:   if (e.button.button == SDL_BUTTON_LEFT) WMMouseUp(e.button.x, e.button.y);   break;
         case SDL_MOUSEMOTION:     WMMouseMove(e.motion.x, e.motion.y); break;
+        case SDL_MOUSEWHEEL:
+            if (FLogMaxScroll > 0) {
+                FLogScroll -= e.wheel.y * 3;
+                if (FLogScroll < 0) FLogScroll = 0;
+                if (FLogScroll > FLogMaxScroll) FLogScroll = FLogMaxScroll;
+            }
+            break;
         case SDL_TEXTINPUT:       WMTextInput(e.text.text); break;
         case SDL_KEYDOWN:         WMKeyDown(e.key.keysym.sym); break;
     }
@@ -615,12 +748,19 @@ void TWizardForm::WMMouseDown(int x, int y) {
     press(btnLeftButton);  press(btnRightButton);
     press(btnPause);       press(btnDirBrowse);  press(btnGroupBrowse);
 
+    if (HitTest(x, y, LayoutRect("cbxDrive"))) {
+        FComboPressed = true;
+        if (!Drives.empty()) ActiveDrive = (ActiveDrive + 1) % (int)Drives.size();
+    }
+
     if (HitTest(x, y, LayoutRect("bmpPlayButton"))) {
+        FPlayPressed = true;
         if (FMusic && !Mix_PlayingMusic()) Mix_PlayMusic(FMusic, -1);
         else if (Mix_PausedMusic()) Mix_ResumeMusic();
     }
 
     if (HitTest(x, y, LayoutRect("bmpPauseButton"))) {
+        FPausePressed = true;
         if (Mix_PlayingMusic() && !Mix_PausedMusic()) Mix_PauseMusic();
     }
 
@@ -632,6 +772,18 @@ void TWizardForm::WMMouseDown(int x, int y) {
         Mix_VolumeMusic(int(FVolume * MIX_MAX_VOLUME));
     }
 
+    // scrollbar arrows
+    if (FLogMaxScroll > 0) {
+        if (HitTest(x, y, FLogUpR)) { FScrollTopPressed = true; FLogScroll = std::max(0, FLogScroll - 1); return; }
+        if (HitTest(x, y, FLogDnR)) { FScrollBotPressed = true; FLogScroll = std::min(FLogMaxScroll, FLogScroll + 1); return; }
+        if (FLogThumbR.h > 0 && HitTest(x, y, FLogThumbR)) {
+            FLogDragging  = true;
+            FLogDragY     = y;
+            FLogDragStart = FLogScroll;
+            return;
+        }
+    }
+
     // drag by titlebar + logo area
     if (y < FTitleH + 65 && !HitTest(x, y, FCloseButtonRect) && !HitTest(x, y, FMinButtonRect)) {
         FDragging = true;
@@ -641,8 +793,14 @@ void TWizardForm::WMMouseDown(int x, int y) {
 
 
 void TWizardForm::WMMouseUp(int x, int y) {
-    FDragging = false;
-    FDraggingVolume = false;
+    FDragging         = false;
+    FDraggingVolume   = false;
+    FLogDragging      = false;
+    FPlayPressed      = false;
+    FPausePressed     = false;
+    FScrollTopPressed = false;
+    FScrollBotPressed = false;
+    FComboPressed     = false;
 
     if (btnLeftButton.Pressed) {
         btnLeftButton.Pressed = false;
@@ -679,10 +837,40 @@ void TWizardForm::WMMouseMove(int x, int y) {
     hover(btnLeftButton);  hover(btnRightButton);
     hover(btnPause);       hover(btnDirBrowse);  hover(btnGroupBrowse);
 
+    chbDesktopIconHover   = HitTest(x, y, LayoutRect("chbDesktopIcon"))  || HitTest(x, y, LayoutRect("lblDesktopIcon"));
+    chbCreateGroupHover   = HitTest(x, y, LayoutRect("chbCreateGroup"))  || HitTest(x, y, LayoutRect("lblCreateGroup"));
+    chbNoUninstallerHover = HitTest(x, y, LayoutRect("chbNoUninstaller"))|| HitTest(x, y, LayoutRect("lblNoUninstaller"));
+
+    FPlayHover       = HitTest(x, y, LayoutRect("bmpPlayButton"));
+    FPauseHover      = HitTest(x, y, LayoutRect("bmpPauseButton"));
+    FComboHover      = HitTest(x, y, LayoutRect("cbxDrive"));
+    FLogThumbHover   = FLogThumbR.h > 0 && HitTest(x, y, FLogThumbR);
+    FScrollTopHover  = HitTest(x, y, FLogUpR);
+    FScrollBotHover  = HitTest(x, y, FLogDnR);
+
+    if (FTrackBtnN) {
+        int tw, th; SDL_QueryTexture(FTrackBtnN, nullptr, nullptr, &tw, &th);
+        SDL_Rect trackR = LayoutRect("bmpTrackBar");
+        int thumbX = trackR.x + (int)(FVolume * (trackR.w - tw));
+        int thumbY = trackR.y + (trackR.h - th) / 2;
+        SDL_Rect tbR = {thumbX, thumbY, tw, th};
+        FTrackBtnHover = HitTest(x, y, tbR);
+    }
+
     if (FDraggingVolume) {
         SDL_Rect trackR = LayoutRect("bmpTrackBar");
         FVolume = std::max(0.0f, std::min(1.0f, float(x - trackR.x) / trackR.w));
         Mix_VolumeMusic(int(FVolume * MIX_MAX_VOLUME));
+    }
+
+    if (FLogDragging && FLogTrackH > 0 && FLogThumbR.h > 0) {
+        int range = FLogTrackH - FLogThumbR.h;
+        if (range > 0) {
+            int dy = y - FLogDragY;
+            FLogScroll = FLogDragStart + dy * FLogMaxScroll / range;
+            if (FLogScroll < 0) FLogScroll = 0;
+            if (FLogScroll > FLogMaxScroll) FLogScroll = FLogMaxScroll;
+        }
     }
 
     if (FDragging && !FDraggingVolume) {
@@ -755,10 +943,17 @@ void TWizardForm::DeinitializeSetup() {
 
     if (FLogoTex)       SDL_DestroyTexture(FLogoTex);
     if (FIconTex)       SDL_DestroyTexture(FIconTex);
-    if (FPlayTex)       SDL_DestroyTexture(FPlayTex);
-    if (FPauseMusicTex) SDL_DestroyTexture(FPauseMusicTex);
+    if (FPlayN)         SDL_DestroyTexture(FPlayN);
+    if (FPlayH)         SDL_DestroyTexture(FPlayH);
+    if (FPlayP)         SDL_DestroyTexture(FPlayP);
+    if (FPauseN)        SDL_DestroyTexture(FPauseN);
+    if (FPauseH)        SDL_DestroyTexture(FPauseH);
+    if (FPauseP)        SDL_DestroyTexture(FPauseP);
     if (FTrackBgTex)    SDL_DestroyTexture(FTrackBgTex);
-    if (FTrackBtnTex)   SDL_DestroyTexture(FTrackBtnTex);
+    if (FTrackBtnN)     SDL_DestroyTexture(FTrackBtnN);
+    if (FTrackBtnH)     SDL_DestroyTexture(FTrackBtnH);
+    if (FTrackBtnP)     SDL_DestroyTexture(FTrackBtnP);
+    if (FScrollVfTex)   SDL_DestroyTexture(FScrollVfTex);
     if (FRenderer)      SDL_DestroyRenderer(FRenderer);
     if (FWindow)        SDL_DestroyWindow(FWindow);
 }

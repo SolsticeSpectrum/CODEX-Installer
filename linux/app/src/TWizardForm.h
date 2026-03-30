@@ -76,9 +76,12 @@ private:
     std::vector<std::string> Drives;
 
     // checkboxes
-    bool chbCreateDesktopIcon = true;
-    bool chbCreateGroup       = true;
-    bool chbNoUninstaller     = false;
+    bool chbCreateDesktopIcon  = true;
+    bool chbCreateGroup        = true;
+    bool chbNoUninstaller      = false;
+    bool chbDesktopIconHover   = false;
+    bool chbCreateGroupHover   = false;
+    bool chbNoUninstallerHover = false;
 
     // buttons
     struct TButton {
@@ -106,6 +109,16 @@ private:
 
     // log
     std::vector<std::string> LogLines;
+    int  FLogScroll     = 0;
+    int  FLogMaxScroll  = 0;
+    int  FLogMaxLines   = 0;
+    int  FLogPrevMax    = 0;
+    bool FLogDragging   = false;
+    bool FLogThumbHover = false;
+    int  FLogDragY      = 0;
+    int  FLogDragStart  = 0;
+    SDL_Rect FLogUpR = {}, FLogDnR = {}, FLogThumbR = {};
+    int  FLogTrackTop = 0, FLogTrackH = 0;
 
     // drag
     bool FDragging = false;
@@ -132,6 +145,8 @@ private:
     int FCbML = 0, FCbMT = 0, FCbMR = 0, FCbMB = 0;
     SDL_Texture *FComboBtnN     = nullptr;
     SDL_Texture *FComboBtnH     = nullptr;
+    SDL_Texture *FComboBtnP     = nullptr;
+    SDL_Texture *FComboBtnD     = nullptr;
     int FCbBtnML = 0, FCbBtnMT = 0, FCbBtnMR = 0, FCbBtnMB = 0;
     SDL_Texture *FComboArrowTex = nullptr;
 
@@ -142,6 +157,20 @@ private:
     SDL_Texture *FProgBarTex   = nullptr;
     int FPfML = 0, FPfMT = 0, FPfMR = 0, FPfMB = 0;
     int FPbML = 0, FPbMT = 0, FPbMR = 0, FPbMB = 0;
+
+    SDL_Texture *FScrollVfTex = nullptr;
+    int FSvfML = 0, FSvfMT = 0, FSvfMR = 0, FSvfMB = 0;
+
+    SDL_Texture *FScrollTopN      = nullptr, *FScrollTopH      = nullptr, *FScrollTopP = nullptr, *FScrollTopD = nullptr;
+    SDL_Texture *FScrollBotN      = nullptr, *FScrollBotH      = nullptr, *FScrollBotP = nullptr, *FScrollBotD = nullptr;
+    SDL_Texture *FScrollTopArrowN = nullptr, *FScrollTopArrowD = nullptr;
+    SDL_Texture *FScrollBotArrowN = nullptr, *FScrollBotArrowD = nullptr;
+    int FSbBtnML = 0, FSbBtnMT = 0, FSbBtnMR = 0, FSbBtnMB = 0;
+    bool FScrollTopHover   = false, FScrollBotHover   = false;
+    bool FScrollTopPressed = false, FScrollBotPressed = false;
+
+    SDL_Texture *FScrollThumbN = nullptr, *FScrollThumbH = nullptr, *FScrollThumbP = nullptr;
+    int FStML = 0, FStMT = 0, FStMR = 0, FStMB = 0;
 
     SDL_Texture *FWndCloseN = nullptr, *FWndCloseH = nullptr;
     SDL_Texture *FWndMinN   = nullptr, *FWndMinH   = nullptr;
@@ -166,12 +195,17 @@ private:
     SDL_Rect    FTitleTextRect = {};
 
     // music controls
-    SDL_Texture *FPlayTex       = nullptr;
-    SDL_Texture *FPauseMusicTex = nullptr;
-    SDL_Texture *FTrackBgTex    = nullptr;
-    SDL_Texture *FTrackBtnTex   = nullptr;
+    SDL_Texture *FPlayN      = nullptr, *FPlayH     = nullptr, *FPlayP     = nullptr;
+    SDL_Texture *FPauseN     = nullptr, *FPauseH    = nullptr, *FPauseP    = nullptr;
+    SDL_Texture *FTrackBgTex = nullptr;
+    SDL_Texture *FTrackBtnN  = nullptr, *FTrackBtnH = nullptr, *FTrackBtnP = nullptr;
     float FVolume         = 0.58f;
     bool  FDraggingVolume = false;
+    bool  FPlayHover   = false, FPauseHover   = false, FTrackBtnHover = false;
+    bool  FPlayPressed = false, FPausePressed = false;
+
+    // combobox state
+    bool FComboHover = false, FComboPressed = false;
 
     // colors
     SDL_Color FClrBorder    = {};

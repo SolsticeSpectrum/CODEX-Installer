@@ -4,12 +4,8 @@ import zlib
 from pathlib import Path
 from typing import Any
 
-from .constants import VSF_HEADER
-from .parsers.stream import read_string
-from .parsers.colors import read_colors, read_sys_colors, read_fonts
-from .parsers.objects import expand
-from .parsers.dfm import parse as parse_dfm
-from .parsers import bitmaps
+from . import constants
+from .parsers import stream, dfm, colors, objects, bitmaps
 
 
 def parse(
@@ -23,11 +19,11 @@ def parse(
     pos  = 0
 
     # header strings
-    name,    pos = read_string(data, pos)
-    version, pos = read_string(data, pos)
-    author,  pos = read_string(data, pos)
-    email,   pos = read_string(data, pos)
-    url,     pos = read_string(data, pos)
+    name,    pos = stream.read_string(data, pos)
+    version, pos = stream.read_string(data, pos)
+    author,  pos = stream.read_string(data, pos)
+    email,   pos = stream.read_string(data, pos)
+    url,     pos = stream.read_string(data, pos)
 
     # display names block
     dns_size = struct.unpack_from("<q", data, pos)[0]
@@ -53,21 +49,21 @@ def parse(
     obj_count = struct.unpack_from("<i", data, pos)[0]
     pos += 4
 
-    objects: list[dict[str, Any]] = []
+    object_list: list[dict[str, Any]] = []
     for _ in range(obj_count):
-        class_name, pos = read_string(data, pos)
+        class_name, pos = stream.read_string(data, pos)
 
         size = struct.unpack_from("<I", data, pos)[0]
         pos += 4
 
         if extract_objects:
             try:
-                obj = parse_dfm(data[pos : pos + size])
+                obj = dfm.parse(data[pos : pos + size])
                 obj["_style_class"] = class_name
-                expand(obj)
-                objects.append(obj)
+                objects.expand(obj)
+                object_list.append(obj)
             except Exception as e:
-                objects.append({
+                object_list.append({
                     "_style_class": class_name,
                     "_parse_error": str(e),
                     "_raw_size":    size,
@@ -75,10 +71,9 @@ def parse(
 
         pos += size
 
-    # colors, syscolors, fonts
-    colors,     pos = read_colors(data, pos)
-    sys_colors, pos = read_sys_colors(data, pos)
-    fonts,      pos = read_fonts(data, pos)
+    color_map,     pos = colors.read_colors(data, pos)
+    sys_color_map, pos = colors.read_sys_colors(data, pos)
+    font_map,      pos = colors.read_fonts(data, pos)
 
     return {
         "name":         name,
@@ -87,17 +82,17 @@ def parse(
         "author_email": email,
         "author_url":   url,
         "bitmaps":      bitmap_list,
-        "objects":       objects if extract_objects else [],
-        "colors":       colors,
-        "sys_colors":   sys_colors,
-        "fonts":        fonts,
+        "objects":      object_list if extract_objects else [],
+        "colors":       color_map,
+        "sys_colors":   sys_color_map,
+        "fonts":        font_map,
     }
 
 
 def _decompress(raw: bytes) -> bytes:
-    header_len = len(VSF_HEADER)
+    header_len = len(constants.VSF_HEADER)
 
-    if raw[:header_len] != VSF_HEADER:
+    if raw[:header_len] != constants.VSF_HEADER:
         raise ValueError(f"not a VCL_STYLE 1.0 file (got {raw[:header_len]!r})")
 
     return zlib.decompress(raw[header_len:])

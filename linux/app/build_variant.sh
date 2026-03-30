@@ -28,8 +28,8 @@ cp "$DIR/fonts/"*.ttf "$PACK/"
 cp "$DIR/assets/Logo${LOGO}.bmp" "$PACK/"
 cp "$DIR/assets/Icon${ICON}.png" "$PACK/" 2>/dev/null || cp "$DIR/assets/Icon${ICON}.ico" "$PACK/"
 cp "$DIR/assets/Music${MUSIC}.ogg" "$PACK/"
-cp "$DIR/assets/Play1.bmp" "$DIR/assets/Pause1.bmp" "$PACK/"
-cp "$DIR/assets/TrackBkg.bmp" "$DIR/assets/TrackBtn1.bmp" "$PACK/"
+cp "$DIR/assets"/Play{1,2,3}.bmp "$DIR/assets"/Pause{1,2,3}.bmp "$PACK/"
+cp "$DIR/assets/TrackBkg.bmp" "$DIR/assets"/TrackBtn{1,2,3}.bmp "$PACK/"
 
 ZIP=$(mktemp --suffix=.zip)
 rm -f "$ZIP"
