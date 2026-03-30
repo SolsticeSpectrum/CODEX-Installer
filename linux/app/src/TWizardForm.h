@@ -40,7 +40,7 @@ private:
     // events
     void HandleEvent(const SDL_Event &e);
     void WMMouseDown(int x, int y);
-    void WMMouseUp(int x, int y);
+    void WMMouseUp(  int x, int y);
     void WMMouseMove(int x, int y);
     void WMTextInput(const char *text);
     void WMKeyDown(SDL_Keycode key);
@@ -60,21 +60,21 @@ private:
     bool           FRunning  = true;
     ISStep         FStep     = wpSelectDir;
 
-    int FTitleH   = 0;
-    int FBorderL  = 0;
-    int FBorderR  = 0;
-    int FBorderB  = 0;
-    int FWindowH  = 0;
+    int FTitleH  = 0;
+    int FBorderL = 0;
+    int FBorderR = 0;
+    int FBorderB = 0;
+    int FWindowH = 0;
 
     // text fields
     struct TNewEdit {
         std::string Text;
         std::string Name;
-        int  Cursor  = 0;
         bool Focused = false;
         bool Enabled = true;
     };
     TNewEdit DirEdit, GroupEdit;
+    void HandleBrowse(const std::string &title, TNewEdit &edit);
     int ActiveDrive = 0;
     std::vector<std::string> Drives;
 
@@ -101,17 +101,17 @@ private:
     // window buttons
     SDL_Rect FCloseButtonRect = {};
     SDL_Rect FMinButtonRect   = {};
-    bool     FCloseHover = false;
-    bool     FMinHover   = false;
+    bool     FCloseHover      = false;
+    bool     FMinHover        = false;
 
     // progress
     ISExtractor FExtractor;
-    int  ProgressValue = 0;
-    bool ISPaused      = false;
-    bool ShowResult    = false;
+    int  FProgressValue = 0;
+    bool ISPaused       = false;
+    bool FShowResult    = false;
 
     // log
-    std::vector<std::string> LogLines;
+    std::vector<std::string> FLogLines;
     int  FLogScroll     = 0;
     int  FLogMaxScroll  = 0;
     int  FLogMaxLines   = 0;
@@ -125,14 +125,14 @@ private:
 
     // drag
     bool FDragging = false;
-    int  FDragX = 0, FDragY = 0;
+    int  FDragX    = 0, FDragY = 0;
 
     // audio
     Mix_Music *FMusic = nullptr;
 
     // textures
-    SDL_Texture *FLogoTex    = nullptr;
-    SDL_Texture *FIconTex    = nullptr;
+    SDL_Texture *FLogoTex     = nullptr;
+    SDL_Texture *FIconTex     = nullptr;
 
     SDL_Texture *FBtnNormal   = nullptr;
     SDL_Texture *FBtnHot      = nullptr;
@@ -189,7 +189,7 @@ private:
     int FBrML = 0, FBrMT = 0, FBrMR = 0, FBrMB = 0;
     int FBbML = 0, FBbMT = 0, FBbMR = 0, FBbMB = 0;
 
-    SDL_Texture *FClientBgTex = nullptr;
+    SDL_Texture *FClientBgTex = nullptr;  // TODO: unsure if this should be rendered
     std::string  FClientTile;
 
     // title bar
@@ -205,8 +205,8 @@ private:
     SDL_Texture *FTrackBtnN  = nullptr, *FTrackBtnH = nullptr, *FTrackBtnP = nullptr;
     float FVolume         = 0.58f;
     bool  FDraggingVolume = false;
-    bool  FPlayHover   = false, FPauseHover   = false, FTrackBtnHover = false;
-    bool  FPlayPressed = false, FPausePressed = false;
+    bool  FPlayHover      = false, FPauseHover   = false, FTrackBtnHover = false;
+    bool  FPlayPressed    = false, FPausePressed = false;
 
     // combobox state
     bool FComboHover = false, FComboPressed = false;

@@ -5,17 +5,17 @@
 
 
 TSeStyleSource::~TSeStyleSource() {
-    for (auto &[k, t] : m_texCache) SDL_DestroyTexture(t);
-    if (m_labelFont)   TTF_CloseFont(m_labelFont);
-    if (m_buttonFont)  TTF_CloseFont(m_buttonFont);
-    if (m_captionFont) TTF_CloseFont(m_captionFont);
+    for (auto &[k, t] : FTexCache) SDL_DestroyTexture(t);
+    if (FLabelFont)   TTF_CloseFont(FLabelFont);
+    if (FButtonFont)  TTF_CloseFont(FButtonFont);
+    if (FCaptionFont) TTF_CloseFont(FCaptionFont);
 }
 
 
 bool TSeStyleSource::LoadFromFile(SDL_Renderer *renderer, const std::string &themeJson,
                                   const std::string &assetsDir, const std::string &fontsDir) {
-    m_renderer = renderer;
-    m_assetsDir = assetsDir;
+    FRenderer  = renderer;
+    FAssetsDir = assetsDir;
 
     std::ifstream f(themeJson);
     if (!f.is_open()) return false;
@@ -23,15 +23,15 @@ bool TSeStyleSource::LoadFromFile(SDL_Renderer *renderer, const std::string &the
     auto theme = json::parse(f, nullptr, false);
     if (theme.is_discarded()) return false;
 
-    m_objects   = theme["objects"];
-    m_colors    = theme["colors"];
-    m_sysColors = theme["sys_colors"];
-    m_fonts     = theme["fonts"];
+    FObjects   = theme["objects"];
+    FColors    = theme["colors"];
+    FSysColors = theme["sys_colors"];
+    FFonts     = theme["fonts"];
 
     // 9pt ≈ 12px, 8pt ≈ 11px
-    m_labelFont   = TTF_OpenFont((fontsDir + "/ArialBd.ttf").c_str(), 12);
-    m_buttonFont  = TTF_OpenFont((fontsDir + "/tahoma.ttf").c_str(), 11);
-    m_captionFont = TTF_OpenFont((fontsDir + "/tahomabd.ttf").c_str(), 11);
+    FLabelFont   = TTF_OpenFont((fontsDir + "/ArialBd.ttf").c_str(), 12);
+    FButtonFont  = TTF_OpenFont((fontsDir + "/tahoma.ttf").c_str(), 11);
+    FCaptionFont = TTF_OpenFont((fontsDir + "/tahomabd.ttf").c_str(), 11);
 
     return true;
 }
@@ -43,7 +43,7 @@ json TSeStyleSource::GetObjectByName(const std::string &path) const {
     std::string part;
     while (std::getline(ss, part, '/')) parts.push_back(part);
 
-    return FindIn(m_objects, parts, 0);
+    return FindIn(FObjects, parts, 0);
 }
 
 
@@ -121,37 +121,37 @@ SDL_Color TSeStyleSource::ParseColor(const std::string &hex) const {
 
 
 SDL_Color TSeStyleSource::GetColor(const std::string &key) const {
-    if (!m_colors.contains(key)) return {0, 0, 0, 255};
-    return ParseColor(m_colors[key].get<std::string>());
+    if (!FColors.contains(key)) return {0, 0, 0, 255};
+    return ParseColor(FColors[key].get<std::string>());
 }
 
 
 SDL_Color TSeStyleSource::GetSysColor(const std::string &key) const {
-    if (!m_sysColors.contains(key)) return {0, 0, 0, 255};
-    return ParseColor(m_sysColors[key].get<std::string>());
+    if (!FSysColors.contains(key)) return {0, 0, 0, 255};
+    return ParseColor(FSysColors[key].get<std::string>());
 }
 
 
 SDL_Color TSeStyleSource::GetFontColor(const std::string &key) const {
-    if (!m_fonts.contains(key)) return {255, 255, 255, 255};
-    auto &f = m_fonts[key];
+    if (!FFonts.contains(key)) return {255, 255, 255, 255};
+    auto &f = FFonts[key];
 
     if (!f.contains("color")) return {255, 255, 255, 255};
     return ParseColor(f["color"].get<std::string>());
 }
 
 
-TTF_Font *TSeStyleSource::LabelFont()   { return m_labelFont; }
-TTF_Font *TSeStyleSource::ButtonFont()  { return m_buttonFont; }
-TTF_Font *TSeStyleSource::CaptionFont() { return m_captionFont; }
+TTF_Font *TSeStyleSource::LabelFont()   { return FLabelFont; }
+TTF_Font *TSeStyleSource::ButtonFont()  { return FButtonFont; }
+TTF_Font *TSeStyleSource::CaptionFont() { return FCaptionFont; }
 
 
 SDL_Texture *TSeStyleSource::LoadTexture(const std::string &filename) {
-    auto it = m_texCache.find(filename);
-    if (it != m_texCache.end()) return it->second;
+    auto it  = FTexCache.find(filename);
+    if  (it != FTexCache.end()) return it->second;
 
-    auto *t = IMG_LoadTexture(m_renderer, (m_assetsDir + "/" + filename).c_str());
-    if (t) m_texCache[filename] = t;
+    auto *t = IMG_LoadTexture(FRenderer, (FAssetsDir + "/" + filename).c_str());
+    if (t) FTexCache[filename] = t;
 
     return t;
 }

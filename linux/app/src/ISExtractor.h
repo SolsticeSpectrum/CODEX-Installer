@@ -34,6 +34,8 @@ public:
 
 class ISExtractor {
 public:
+    ~ISExtractor();
+
     using ProgressCallback = std::function<void(int percent, const std::string &file)>;
     using FinishCallback   = std::function<void(bool success)>;
 

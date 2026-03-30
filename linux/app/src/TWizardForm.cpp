@@ -10,6 +10,14 @@ static bool HitTest(int x, int y, const SDL_Rect &r) {
     return x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
 }
 
+static void DrawCentered(SDL_Renderer *r, SDL_Texture *tex, const SDL_Rect &dst) {
+    if (!tex) return;
+    int tw, th;
+    SDL_QueryTexture(tex, nullptr, nullptr, &tw, &th);
+    SDL_Rect d = {dst.x + (dst.w - tw) / 2, dst.y + (dst.h - th) / 2, tw, th};
+    SDL_RenderCopy(r, tex, nullptr, &d);
+}
+
 
 bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::string &themeDir,
                                    const std::string &layoutPath, const std::string &fontsDir,
@@ -159,10 +167,8 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     auto pmBlend = SDL_ComposeCustomBlendMode(
         SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
         SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
-    if (FScrollTopArrowN) SDL_SetTextureBlendMode(FScrollTopArrowN, pmBlend);
-    if (FScrollTopArrowD) SDL_SetTextureBlendMode(FScrollTopArrowD, pmBlend);
-    if (FScrollBotArrowN) SDL_SetTextureBlendMode(FScrollBotArrowN, pmBlend);
-    if (FScrollBotArrowD) SDL_SetTextureBlendMode(FScrollBotArrowD, pmBlend);
+    for (auto *tex : {FScrollTopArrowN, FScrollTopArrowD, FScrollBotArrowN, FScrollBotArrowD})
+        if (tex) SDL_SetTextureBlendMode(tex, pmBlend);
 
     // progressbar
     auto progFrame = FStyleSource.GetObjectByName("ProgressBar/Frame");
@@ -300,7 +306,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     btnDirBrowse.Rect     = LayoutRect("btnDirBrowse");     btnDirBrowse.Caption   = "Browse...";
     btnGroupBrowse.Rect   = LayoutRect("btnGroupBrowse");   btnGroupBrowse.Caption = "Browse...";
 
-    LogLines.push_back("Waiting for Input...");
+    FLogLines.push_back("Waiting for Input...");
 
     // audio
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
@@ -405,11 +411,7 @@ void TWizardForm::PaintNC() {
 
     // window buttons
     auto drawBtn = [&](const SDL_Rect &r, SDL_Texture *n, SDL_Texture *hot, bool hover) {
-        auto *t = hover ? hot : n;
-        if (!t) return;
-        int tw, th; SDL_QueryTexture(t, nullptr, nullptr, &tw, &th);
-        SDL_Rect d = {r.x + (r.w - tw) / 2, r.y + (r.h - th) / 2, tw, th};
-        SDL_RenderCopy(FRenderer, t, nullptr, &d);
+        DrawCentered(FRenderer, hover ? hot : n, r);
     };
 
     drawBtn(FCloseButtonRect, FWndCloseN, FWndCloseH, FCloseHover);
@@ -475,11 +477,7 @@ void TWizardForm::EditDraw() {
     auto *cbBtnTex = FComboPressed ? FComboBtnP : (FComboHover ? FComboBtnH : FComboBtnN);
     if (cbBtnTex) {
         TSeBitmapObject::DrawTex(r, cbBtnTex, FCbBtnML, FCbBtnMT, FCbBtnMR, FCbBtnMB, btnR);
-        if (FComboArrowTex) {
-            int aw, ah; SDL_QueryTexture(FComboArrowTex, nullptr, nullptr, &aw, &ah);
-            SDL_Rect ad = {btnR.x + (btnR.w - aw) / 2, btnR.y + (btnR.h - ah) / 2, aw, ah};
-            SDL_RenderCopy(r, FComboArrowTex, nullptr, &ad);
-        }
+        DrawCentered(r, FComboArrowTex, btnR);
     }
 }
 
@@ -552,8 +550,8 @@ void TWizardForm::ProgressDraw() {
     SDL_Rect r = LayoutRect("ProgressGauge");
     TSeBitmapObject::DrawTex(FRenderer, FProgFrameTex, FPfML, FPfMT, FPfMR, FPfMB, r);
 
-    if (ProgressValue > 0) {
-        int barW = (r.w - 2) * ProgressValue / 1000;
+    if (FProgressValue > 0) {
+        int barW = (r.w - 2) * FProgressValue / 1000;
         if (barW > 0) {
             SDL_Rect barR = {r.x + 1, r.y + 1, barW, r.h - 2};
             TSeBitmapObject::DrawTex(FRenderer, FProgBarTex, FPbML, FPbMT, FPbMR, FPbMB, barR);
@@ -594,7 +592,7 @@ void TWizardForm::ProgressDraw() {
     auto *logFont = FStyleSource.ButtonFont();
     int lineH     = logFont ? TTF_FontLineSkip(logFont) : 14;
     int maxLines  = (textArea.h - 4) / lineH;
-    int total     = (int)LogLines.size();
+    int total     = (int)FLogLines.size();
     bool disabled = total <= maxLines;
     int trackTop  = upR.y + upR.h;
     int trackH    = dnR.y - trackTop;
@@ -619,16 +617,8 @@ void TWizardForm::ProgressDraw() {
     TSeBitmapObject::DrawTex(FRenderer, topBtn, FSbBtnML, FSbBtnMT, FSbBtnMR, FSbBtnMB, upR);
     TSeBitmapObject::DrawTex(FRenderer, botBtn, FSbBtnML, FSbBtnMT, FSbBtnMR, FSbBtnMB, dnR);
 
-    if (topArrow) {
-        int aw, ah; SDL_QueryTexture(topArrow, nullptr, nullptr, &aw, &ah);
-        SDL_Rect d = {upR.x + (upR.w - aw) / 2, upR.y + (upR.h - ah) / 2, aw, ah};
-        SDL_RenderCopy(FRenderer, topArrow, nullptr, &d);
-    }
-    if (botArrow) {
-        int aw, ah; SDL_QueryTexture(botArrow, nullptr, nullptr, &aw, &ah);
-        SDL_Rect d = {dnR.x + (dnR.w - aw) / 2, dnR.y + (dnR.h - ah) / 2, aw, ah};
-        SDL_RenderCopy(FRenderer, botArrow, nullptr, &d);
-    }
+    DrawCentered(FRenderer, topArrow, upR);
+    DrawCentered(FRenderer, botArrow, dnR);
 
     // thumb
     FLogThumbR = {};
@@ -648,7 +638,7 @@ void TWizardForm::ProgressDraw() {
         for (int i = 0; i < maxLines && (FLogScroll + i) < total; i++) {
             int y = textArea.y + 2 + i * lineH;
             SDL_Rect tr = {textArea.x + 2, y, textArea.w - 4, lineH};
-            TSeBitmapObject::DrawText(FRenderer, logFont, FClrEditText, LogLines[FLogScroll + i], tr);
+            TSeBitmapObject::DrawText(FRenderer, logFont, FClrEditText, FLogLines[FLogScroll + i], tr);
         }
     }
 }
@@ -682,7 +672,7 @@ void TWizardForm::AudioDraw() {
 
 
 void TWizardForm::ResultDraw() {
-    if (!ShowResult) return;
+    if (!FShowResult) return;
 
     SDL_Rect r = LayoutRect("lblInstallResult");
     SDL_Color c = {0x00, 0xdd, 0x34, 255};
@@ -776,6 +766,16 @@ void TWizardForm::WMMouseDown(int x, int y) {
 }
 
 
+void TWizardForm::HandleBrowse(const std::string &title, TNewEdit &edit) {
+    auto bg = FStyleSource.GetSysColor("clBtnFace");
+    auto fg = FStyleSource.GetSysColor("clBtnText");
+    auto wb = FStyleSource.GetSysColor("clWindow");
+    auto wt = FStyleSource.GetSysColor("clWindowText");
+    auto dir = TSelectFolderForm::Execute(title, edit.Text, bg, fg, wb, wt);
+    if (!dir.empty()) edit.Text = dir;
+}
+
+
 void TWizardForm::WMMouseUp(int x, int y) {
     FDragging         = false;
     FDraggingVolume   = false;
@@ -789,7 +789,7 @@ void TWizardForm::WMMouseUp(int x, int y) {
     if (btnLeftButton.Pressed) {
         btnLeftButton.Pressed = false;
         if (HitTest(x, y, btnLeftButton.Rect)) {
-            if (FStep == wpInstalling) { FExtractor.Cancel(); CurPageChanged(wpSelectDir); LogLines.push_back("Cancelled."); }
+            if (FStep == wpInstalling) { FExtractor.Cancel(); CurPageChanged(wpSelectDir); FLogLines.push_back("Cancelled."); }
             else if (FStep == wpFinished) { /* TODO: launch game executable */ }
             else FRunning = false;
         }
@@ -814,25 +814,13 @@ void TWizardForm::WMMouseUp(int x, int y) {
 
     if (btnDirBrowse.Pressed) {
         btnDirBrowse.Pressed = false;
-        if (HitTest(x, y, btnDirBrowse.Rect)) {
-            auto bg = FStyleSource.GetSysColor("clBtnFace");
-            auto fg = FStyleSource.GetSysColor("clBtnText");
-            auto wb = FStyleSource.GetSysColor("clWindow");
-            auto wt = FStyleSource.GetSysColor("clWindowText");
-            auto dir = TSelectFolderForm::Execute("Select Install Directory", DirEdit.Text, bg, fg, wb, wt);
-            if (!dir.empty()) DirEdit.Text = dir;
-        }
+        if (HitTest(x, y, btnDirBrowse.Rect))
+            HandleBrowse("Select Install Directory", DirEdit);
     }
     if (btnGroupBrowse.Pressed) {
         btnGroupBrowse.Pressed = false;
-        if (HitTest(x, y, btnGroupBrowse.Rect)) {
-            auto bg = FStyleSource.GetSysColor("clBtnFace");
-            auto fg = FStyleSource.GetSysColor("clBtnText");
-            auto wb = FStyleSource.GetSysColor("clWindow");
-            auto wt = FStyleSource.GetSysColor("clWindowText");
-            auto dir = TSelectFolderForm::Execute("Select Start Menu Directory", GroupEdit.Text, bg, fg, wb, wt);
-            if (!dir.empty()) GroupEdit.Text = dir;
-        }
+        if (HitTest(x, y, btnGroupBrowse.Rect))
+            HandleBrowse("Select Start Menu Directory", GroupEdit);
     }
 }
 
@@ -917,20 +905,20 @@ void TWizardForm::CurPageChanged(ISStep step) {
         btnRightButton = {LayoutRect("btnRightButton"), "Install", false, false, true, true};
         btnPause.Visible = false;
 
-        ShowResult = false;
+        FShowResult = false;
 
     } else if (step == wpInstalling) {
-        DirEdit.Enabled  = false;  DirEdit.Focused  = false;
+        DirEdit.Enabled   = false;  DirEdit.Focused  = false;
         GroupEdit.Enabled = false;  GroupEdit.Focused = false;
 
         btnLeftButton  = {LayoutRect("btnLeftButton"),  "Cancel", false, false, true, true};
         btnRightButton.Visible = false;
         btnPause = {LayoutRect("btnRightButton"), "Pause", false, false, true, true};
 
-        ProgressValue = 0;
+        FProgressValue = 0;
         ISPaused = false;
-        LogLines.clear();
-        LogLines.push_back("Extracting files...");
+        FLogLines.clear();
+        FLogLines.push_back("Extracting files...");
 
         // matches setup.iss {src} for .bin files, tools in assets
         FExtractor.SetSource(FSourceDir);
@@ -938,9 +926,9 @@ void TWizardForm::CurPageChanged(ISStep step) {
         FExtractor.SetToolsDir(FAssetsDir + "/tools");
         // matches setup.iss ProgressCallback
         FExtractor.SetOnProgress([this](int pct, const std::string &file) {
-            if (pct <= 1000) ProgressValue = pct;
-            if (LogLines.empty() || LogLines.back() != file)
-                LogLines.push_back(file);
+            if (pct <= 1000) FProgressValue = pct;
+            if (FLogLines.empty() || FLogLines.back() != file)
+                FLogLines.push_back(file);
         });
         FExtractor.SetOnFinish([this](bool ok) {
             CurPageChanged(wpFinished);
@@ -952,8 +940,8 @@ void TWizardForm::CurPageChanged(ISStep step) {
         btnLeftButton  = {LayoutRect("btnLeftButton"),  "Run",    false, false, true, true};
         btnRightButton = {LayoutRect("btnRightButton"), "Finish", false, false, true, true};
 
-        ShowResult = true;
-        LogLines.push_back("Done!");
+        FShowResult = true;
+        FLogLines.push_back("Done!");
     }
 }
 
@@ -962,19 +950,18 @@ void TWizardForm::DeinitializeSetup() {
     if (FMusic) { Mix_FreeMusic(FMusic); FMusic = nullptr; }
     Mix_CloseAudio();
 
-    if (FLogoTex)       SDL_DestroyTexture(FLogoTex);
-    if (FIconTex)       SDL_DestroyTexture(FIconTex);
-    if (FPlayN)         SDL_DestroyTexture(FPlayN);
-    if (FPlayH)         SDL_DestroyTexture(FPlayH);
-    if (FPlayP)         SDL_DestroyTexture(FPlayP);
-    if (FPauseN)        SDL_DestroyTexture(FPauseN);
-    if (FPauseH)        SDL_DestroyTexture(FPauseH);
-    if (FPauseP)        SDL_DestroyTexture(FPauseP);
-    if (FTrackBgTex)    SDL_DestroyTexture(FTrackBgTex);
-    if (FTrackBtnN)     SDL_DestroyTexture(FTrackBtnN);
-    if (FTrackBtnH)     SDL_DestroyTexture(FTrackBtnH);
-    if (FTrackBtnP)     SDL_DestroyTexture(FTrackBtnP);
-    if (FScrollVfTex)   SDL_DestroyTexture(FScrollVfTex);
-    if (FRenderer)      SDL_DestroyRenderer(FRenderer);
-    if (FWindow)        SDL_DestroyWindow(FWindow);
+    if (FLogoTex)    SDL_DestroyTexture(FLogoTex);
+    if (FIconTex)    SDL_DestroyTexture(FIconTex);
+    if (FPlayN)      SDL_DestroyTexture(FPlayN);
+    if (FPlayH)      SDL_DestroyTexture(FPlayH);
+    if (FPlayP)      SDL_DestroyTexture(FPlayP);
+    if (FPauseN)     SDL_DestroyTexture(FPauseN);
+    if (FPauseH)     SDL_DestroyTexture(FPauseH);
+    if (FPauseP)     SDL_DestroyTexture(FPauseP);
+    if (FTrackBgTex) SDL_DestroyTexture(FTrackBgTex);
+    if (FTrackBtnN)  SDL_DestroyTexture(FTrackBtnN);
+    if (FTrackBtnH)  SDL_DestroyTexture(FTrackBtnH);
+    if (FTrackBtnP)  SDL_DestroyTexture(FTrackBtnP);
+    if (FRenderer)   SDL_DestroyRenderer(FRenderer);
+    if (FWindow)     SDL_DestroyWindow(FWindow);
 }

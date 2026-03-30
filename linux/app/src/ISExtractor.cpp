@@ -113,7 +113,7 @@ bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPat
     FileInStream_CreateVTable(&archiveStream);
     LookToRead2_CreateVTable(&lookStream, False);
 
-    static Byte lookBuf[1 << 18];
+    Byte lookBuf[1 << 18];
     lookStream.buf      = lookBuf;
     lookStream.bufSize  = sizeof(lookBuf);
     lookStream.realStream = &archiveStream.vt;
@@ -139,10 +139,16 @@ bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPat
         std::vector<UInt16> nameBuf(nameLen);
         SzArEx_GetFileNameUtf16(&db, i, nameBuf.data());
 
-        // UTF-16 to UTF-8
         std::string name;
-        for (size_t j = 0; j < nameLen - 1; j++)
-            name += (char)nameBuf[j];
+        for (size_t j = 0; j < nameLen - 1; j++) {
+            uint16_t c = nameBuf[j];
+            if (c < 0x80)        { name += (char)c; }
+            else if (c < 0x800)  { name += (char)(0xC0 | (c >> 6));
+                                   name += (char)(0x80 | (c & 0x3F)); }
+            else                 { name += (char)(0xE0 | (c >> 12));
+                                   name += (char)(0x80 | ((c >> 6) & 0x3F));
+                                   name += (char)(0x80 | (c & 0x3F)); }
+        }
 
         bool isDir = SzArEx_IsDir(&db, i);
         std::string fullPath = outPath + "/" + name;
@@ -186,8 +192,6 @@ bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPat
 struct RarCallbackData {
     ISDoneCallback callback;
     std::atomic<bool> *cancelled;
-    int fileIndex;
-    int totalFiles;
 };
 
 static int CALLBACK RarCallback(UINT msg, LPARAM userData, LPARAM p1, LPARAM p2) {
@@ -220,7 +224,7 @@ bool ISRarExtract::Extract(const std::string &inFile, const std::string &outPath
     hArc = RAROpenArchive(&arcData);
     if (!hArc || arcData.OpenResult != ERAR_SUCCESS) return false;
 
-    RarCallbackData cbData = {callback, cancelled, 0, totalFiles};
+    RarCallbackData cbData = {callback, cancelled};
     RARSetCallback(hArc, RarCallback, (LPARAM)&cbData);
 
     fs::create_directories(outPath);
@@ -233,8 +237,6 @@ bool ISRarExtract::Extract(const std::string &inFile, const std::string &outPath
         if (ret != ERAR_SUCCESS) break;
 
         fileIndex++;
-        cbData.fileIndex = fileIndex;
-
         if (callback) {
             int pct = totalFiles > 0 ? (int)(fileIndex * 1000 / totalFiles) : 0;
             if (callback(pct, 0, header.FileName)) break;
@@ -247,6 +249,12 @@ bool ISRarExtract::Extract(const std::string &inFile, const std::string &outPath
 
 
 // ---------- ISExtractor (orchestrator) ----------
+
+ISExtractor::~ISExtractor() {
+    Cancel();
+    if (FThread.joinable()) FThread.join();
+}
+
 
 void ISExtractor::SetSource(const std::string &sourceDir)  { FSourceDir = sourceDir; }
 void ISExtractor::SetTarget(const std::string &installDir) { FTarget = installDir; }
@@ -278,6 +286,8 @@ void ISExtractor::Start() {
         return;
     }
 
+    if (FThread.joinable()) FThread.join();
+
     FThread = std::thread([this]() {
         if (!FToolsDir.empty()) chdir(FToolsDir.c_str());
 
@@ -306,7 +316,6 @@ void ISExtractor::Start() {
         FRunning = false;
         if (FOnFinish) FOnFinish(!error && !FCancelled);
     });
-    FThread.detach();
 }
 
 

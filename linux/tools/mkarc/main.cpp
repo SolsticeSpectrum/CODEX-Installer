@@ -1,15 +1,117 @@
 // mkarc — FreeArc-compatible archive creator for Linux
-// 4x4 parallel compression, method chaining, solid block splitting
 //
-// usage: mkarc [-m<method>] [-s<solidMB>] [-v<volMB>] [-t<threads>] <srcdir> <output.bin>
+// usage: mkarc [-m<method>] [-s<solidMB>] [-v<volMB>] <srcdir> <output.bin>
 
 #include "compress.h"
 #include "multicompress.h"
 
 
+// generate volume path: "setup.bin" + vol 1 → "setup-1.bin"
+static std::string volumePath(const std::string &base, int vol) {
+    auto dot = base.rfind('.');
+    std::string stem = (dot != std::string::npos) ? base.substr(0, dot) : base;
+    std::string ext  = (dot != std::string::npos) ? base.substr(dot) : ".bin";
+    return stem + "-" + std::to_string(vol) + ext;
+}
+
+static void writeHeader(FILE *f, std::vector<BInfo> &ctrlBlocks) {
+    WBuf h; h.u32(ARC_SIG); h.u32(ARC_VER);
+    uint32_t c = CalcCRC(h.data(), h.size());
+    uint64_t p = ftell(f);
+    fwrite(h.data(), 1, h.size(), f);
+    BInfo bi = {BT_HEADER, "storing", p, (uint64_t)h.size(), (uint64_t)h.size(), c};
+    writeDescr(f, bi);
+    ctrlBlocks.push_back(bi);
+}
+
+static void writeDirAndFooter(FILE *f,
+                              const std::vector<BInfo> &ctrlBlocks,
+                              const std::vector<BInfo> &dataBlocks,
+                              const std::vector<FE> &files,
+                              const std::vector<std::string> &dirs,
+                              int blkStart, int blkEnd,
+                              int fileStart, int fileEnd) {
+    int nBlk = (int)dataBlocks.size();
+
+    uint64_t dirPos = ftell(f);
+    WBuf db;
+    db.vi(nBlk);
+
+    // files per block
+    for (int b = blkStart; b < blkEnd; b++) {
+        int cnt = 0;
+        for (int i = fileStart; i < fileEnd; i++)
+            if (files[i].block == b) cnt++;
+        db.vi(cnt);
+    }
+    // compressor per block (dataBlocks is relative to this volume)
+    for (int d = 0; d < nBlk; d++)
+        db.str(dataBlocks[d].comp.c_str());
+    // offset per block
+    for (int d = 0; d < nBlk; d++)
+        db.vi(dirPos - dataBlocks[d].pos);
+    // compsize per block
+    for (int d = 0; d < nBlk; d++)
+        db.vi(dataBlocks[d].csz);
+
+    // directories (all needed by files in this volume)
+    std::vector<std::string> volDirs;
+    for (int i = fileStart; i < fileEnd; i++) {
+        auto &d = files[i].dir;
+        if (std::find(volDirs.begin(), volDirs.end(), d) == volDirs.end())
+            volDirs.push_back(d);
+    }
+    db.vi((int)volDirs.size());
+    for (auto &d : volDirs) db.str(d.c_str());
+
+    // per-file data
+    for (int i = fileStart; i < fileEnd; i++) db.str(files[i].name.c_str());
+    for (int i = fileStart; i < fileEnd; i++) {
+        int dn = std::find(volDirs.begin(), volDirs.end(), files[i].dir) - volDirs.begin();
+        db.vi(dn);
+    }
+    for (int i = fileStart; i < fileEnd; i++) db.vi(files[i].sz);
+    for (int i = fileStart; i < fileEnd; i++) db.u32(files[i].mt);
+    for (int i = fileStart; i < fileEnd; i++) db.u8(files[i].isdir ? 1 : 0);
+    for (int i = fileStart; i < fileEnd; i++) db.u32(files[i].crc);
+
+    uint32_t dirOrig = db.size();
+    uint32_t dirCrc  = CalcCRC(db.data(), dirOrig);
+    fwrite(db.data(), 1, dirOrig, f);
+
+    std::vector<BInfo> allCtrl = ctrlBlocks;
+    BInfo dirBi = {BT_DIR, "storing", dirPos, (uint64_t)dirOrig, (uint64_t)dirOrig, dirCrc};
+    writeDescr(f, dirBi);
+    allCtrl.push_back(dirBi);
+
+    // FOOTER
+    uint64_t footerPos = ftell(f);
+    WBuf fb;
+    fb.vi((int)allCtrl.size());
+    for (auto &cb : allCtrl) {
+        fb.vi(cb.type);
+        fb.str(cb.comp.c_str());
+        fb.vi(footerPos - cb.pos);
+        fb.vi(cb.orig);
+        fb.vi(cb.csz);
+        fb.u32(cb.crc);
+    }
+    fb.u8(0); // not locked
+    fb.vi(0); // no comment
+
+    uint32_t fOrig = fb.size();
+    uint32_t fCrc  = CalcCRC(fb.data(), fOrig);
+    fwrite(fb.data(), 1, fOrig, f);
+
+    BInfo footBi = {BT_FOOTER, "storing", footerPos, (uint64_t)fOrig, (uint64_t)fOrig, fCrc};
+    writeDescr(f, footBi);
+}
+
+
 int main(int argc, char *argv[]) {
     const char *method = "4x4:lzma:fast", *srcDir = nullptr, *outPath = nullptr;
-    int solidMB = 128, volumeMB = 0;
+    int solidMB  = 128;
+    int volumeMB = 4700; // DVD5 default, 0 = no splitting
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] != '-') { if (!srcDir) srcDir = argv[i]; else outPath = argv[i]; }
@@ -75,22 +177,21 @@ int main(int argc, char *argv[]) {
         if (std::find(dirs.begin(),dirs.end(),f.dir)==dirs.end())
             dirs.push_back(f.dir);
 
-    FILE *out = fopen(outPath, "wb");
-    if (!out) { fprintf(stderr,"can't create: %s\n",outPath); return 1; }
+    uint64_t volumeLimit = volumeMB ? (uint64_t)volumeMB * 1024 * 1024 : 0;
+    bool splitting = volumeLimit > 0;
+
+    // open first volume
+    int volNum = 1;
+    std::string curVolPath = splitting ? volumePath(outPath, volNum) : outPath;
+    FILE *out = fopen(curVolPath.c_str(), "wb");
+    if (!out) { fprintf(stderr, "can't create: %s\n", curVolPath.c_str()); return 1; }
 
     std::vector<BInfo> ctrlBlocks;
     std::vector<BInfo> dataBlocks;
+    int volBlkStart  = 0;   // first solid block index in current volume
+    int volFileStart = 0;   // first file index in current volume
 
-    // HEADER_BLOCK
-    {
-        WBuf h; h.u32(ARC_SIG); h.u32(ARC_VER);
-        uint32_t c = CalcCRC(h.data(), h.size());
-        uint64_t p = ftell(out);
-        fwrite(h.data(),1,h.size(),out);
-        BInfo bi = {BT_HEADER,"storing",p,(uint64_t)h.size(),(uint64_t)h.size(),c};
-        writeDescr(out,bi);
-        ctrlBlocks.push_back(bi);
-    }
+    writeHeader(out, ctrlBlocks);
 
     // pre-compute block metadata
     struct BlkInfo { int startF, endF; uint64_t origSz; FileGroup grp; std::string method; };
@@ -197,6 +298,24 @@ int main(int argc, char *argv[]) {
                         curWriteBlk++;
                         nextSeqInBlk = 0;
                         blockDataStart = ftell(out);
+
+                        // volume boundary check
+                        if (splitting && (uint64_t)ftell(out) >= volumeLimit && curWriteBlk < nBlocks) {
+                            int volFileEnd = (curWriteBlk < nBlocks) ? blkInfos[curWriteBlk].startF : (int)files.size();
+                            writeDirAndFooter(out, ctrlBlocks, dataBlocks, files, dirs, volBlkStart, curWriteBlk, volFileStart, volFileEnd);
+                            fclose(out);
+                            printf("  volume %d: %s\n", volNum, curVolPath.c_str());
+
+                            volNum++;
+                            curVolPath = volumePath(outPath, volNum);
+                            out = fopen(curVolPath.c_str(), "wb");
+                            ctrlBlocks.clear();
+                            dataBlocks.clear();
+                            volBlkStart  = curWriteBlk;
+                            volFileStart = volFileEnd;
+                            writeHeader(out, ctrlBlocks);
+                            blockDataStart = ftell(out);
+                        }
                     }
                 }
 
@@ -220,13 +339,8 @@ int main(int argc, char *argv[]) {
                     sb = workQ.front(); workQ.pop();
                 }
 
-                if (sb->method == "storing") {
-                    sb->out.resize(sb->in.size());
-                    memcpy(sb->out.data(), sb->in.data(), sb->in.size());
-                } else if (isIncompressible(sb->in.data(), sb->in.size())) {
-                    sb->out.resize(sb->in.size());
-                    memcpy(sb->out.data(), sb->in.data(), sb->in.size());
-                    sb->method = "storing";
+                if (sb->method == "storing" || isIncompressible(sb->in.data(), sb->in.size())) {
+                    storeRaw(sb);
                 } else if (useLzma && lctx.initialized) {
                     JobInStream inS = { jobStreamRead, sb->in.data(), (int)sb->in.size() };
                     JobOutStream outS = { jobStreamWrite, &sb->out, 0 };
@@ -234,26 +348,20 @@ int main(int argc, char *argv[]) {
                     SRes res = LzmaEnc_Encode(lctx.enc,
                         (ISeqOutStream*)&outS, (ISeqInStream*)&inS,
                         nullptr, &g_Alloc4x4, &g_Alloc4x4);
-                    if (res != SZ_OK || outS.wp >= (int)sb->in.size()) {
-                        sb->out.resize(sb->in.size());
-                        memcpy(sb->out.data(), sb->in.data(), sb->in.size());
-                        sb->method = "storing";
-                    } else {
+                    if (res != SZ_OK || outS.wp >= (int)sb->in.size())
+                        storeRaw(sb);
+                    else
                         sb->out.resize(outS.wp);
-                    }
                 } else {
-                    // generic fallback
                     Job4x4 j4;
                     j4.method = sb->method;
                     j4.rp = sb->in.data(); j4.rl = sb->in.size(); j4.wp = 0;
                     j4.out.resize(sb->in.size() + sb->in.size()/8 + 65536);
                     j4.in = sb->in;
                     int r = Compress((char*)j4.method.c_str(), job4x4Cb, &j4);
-                    if (r < 0 || j4.wp >= (int)sb->in.size()) {
-                        sb->out.resize(sb->in.size());
-                        memcpy(sb->out.data(), sb->in.data(), sb->in.size());
-                        sb->method = "storing";
-                    } else {
+                    if (r < 0 || j4.wp >= (int)sb->in.size())
+                        storeRaw(sb);
+                    else {
                         j4.out.resize(j4.wp);
                         sb->out = std::move(j4.out);
                     }
@@ -356,84 +464,43 @@ int main(int argc, char *argv[]) {
             BInfo binfo = {BT_DATA, bi.method, dataPos, bi.origSz, dataEnd-dataPos, 0};
             writeDescr(out, binfo);
             dataBlocks.push_back(binfo);
+
+            // volume boundary check
+            if (splitting && (uint64_t)ftell(out) >= volumeLimit && blk + 1 < nBlocks) {
+                int nextBlk = blk + 1;
+                int volFileEnd = blkInfos[nextBlk].startF;
+                writeDirAndFooter(out, ctrlBlocks, dataBlocks, files, dirs, volBlkStart, nextBlk, volFileStart, volFileEnd);
+                fclose(out);
+                printf("  volume %d: %s\n", volNum, curVolPath.c_str());
+
+                volNum++;
+                curVolPath = volumePath(outPath, volNum);
+                out = fopen(curVolPath.c_str(), "wb");
+                ctrlBlocks.clear();
+                dataBlocks.clear();
+                volBlkStart  = nextBlk;
+                volFileStart = volFileEnd;
+                writeHeader(out, ctrlBlocks);
+            }
         }
     }
 
-    // DIR_BLOCK
-    uint64_t dirPos = ftell(out);
-    {
-        WBuf db;
-        db.vi(nBlocks);
-
-        for (int blk = 0; blk < nBlocks; blk++) {
-            int cnt = 0;
-            for (auto &f : files) if (f.block == blk) cnt++;
-            db.vi(cnt);
-        }
-        for (int blk = 0; blk < nBlocks; blk++)
-            db.str(dataBlocks[blk].comp.c_str());
-        for (int blk = 0; blk < nBlocks; blk++)
-            db.vi(dirPos - dataBlocks[blk].pos);
-        for (int blk = 0; blk < nBlocks; blk++)
-            db.vi(dataBlocks[blk].csz);
-
-        db.vi((int)dirs.size());
-        for (auto &d : dirs) db.str(d.c_str());
-
-        for (auto &f : files) db.str(f.name.c_str());
-        for (auto &f : files) {
-            int dn = std::find(dirs.begin(),dirs.end(),f.dir) - dirs.begin();
-            db.vi(dn);
-        }
-        for (auto &f : files) db.vi(f.sz);
-        for (auto &f : files) db.u32(f.mt);
-        for (auto &f : files) db.u8(f.isdir ? 1 : 0);
-        for (auto &f : files) db.u32(f.crc);
-
-        uint32_t dirOrig = db.size();
-        uint32_t dirCrc  = CalcCRC(db.data(), dirOrig);
-        std::vector<uint8_t> dirC;
-        int dirCSz = compressSmall("storing", db.data(), dirOrig, dirC);
-        if (dirCSz < 0) { fprintf(stderr,"dir failed\n"); return 1; }
-        fwrite(dirC.data(), 1, dirCSz, out);
-
-        BInfo bi = {BT_DIR,"storing",dirPos,(uint64_t)dirOrig,(uint64_t)dirCSz,dirCrc};
-        writeDescr(out,bi);
-        ctrlBlocks.push_back(bi);
-    }
-
-    // FOOTER_BLOCK
-    uint64_t footerPos = ftell(out);
-    {
-        WBuf fb;
-        fb.vi((int)ctrlBlocks.size());
-        for (auto &cb : ctrlBlocks) {
-            fb.vi(cb.type);
-            fb.str(cb.comp.c_str());
-            fb.vi(footerPos - cb.pos);
-            fb.vi(cb.orig);
-            fb.vi(cb.csz);
-            fb.u32(cb.crc);
-        }
-        fb.u8(0); // not locked
-        fb.vi(0); // no comment
-
-        uint32_t fOrig = fb.size();
-        uint32_t fCrc  = CalcCRC(fb.data(), fOrig);
-        std::vector<uint8_t> fC;
-        int fCSz = compressSmall("storing", fb.data(), fOrig, fC);
-        if (fCSz < 0) { fprintf(stderr,"footer failed\n"); return 1; }
-        fwrite(fC.data(), 1, fCSz, out);
-
-        BInfo bi = {BT_FOOTER,"storing",footerPos,(uint64_t)fOrig,(uint64_t)fCSz,fCrc};
-        writeDescr(out,bi);
-    }
-
+    // finalize last volume
+    writeDirAndFooter(out, ctrlBlocks, dataBlocks, files, dirs,
+                      volBlkStart, nBlocks, volFileStart, (int)files.size());
     fclose(out);
-    uint64_t total = fs::file_size(outPath);
-    printf("done: %llu -> %llu bytes (%.1f%%)\n",
-           (unsigned long long)totalOrig, (unsigned long long)total,
-           totalOrig>0 ? 100.0*total/totalOrig : 0.0);
+    if (splitting) printf("  volume %d: %s\n", volNum, curVolPath.c_str());
+
+    // summary
+    uint64_t totalComp = 0;
+    for (int v = 1; v <= volNum; v++) {
+        std::string p = splitting ? volumePath(outPath, v) : outPath;
+        totalComp += fs::file_size(p);
+    }
+    printf("done: %llu -> %llu bytes (%.1f%%)%s\n",
+           (unsigned long long)totalOrig, (unsigned long long)totalComp,
+           totalOrig > 0 ? 100.0 * totalComp / totalOrig : 0.0,
+           splitting ? (std::string(", ") + std::to_string(volNum) + " volumes").c_str() : "");
 
     return 0;
 }

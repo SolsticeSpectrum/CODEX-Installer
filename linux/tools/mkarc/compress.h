@@ -51,6 +51,14 @@ static bool isIncompressible(const uint8_t *data, int size) {
 }
 
 
+template<typename T>
+static void storeRaw(T *blk) {
+    blk->out.resize(blk->in.size());
+    memcpy(blk->out.data(), blk->in.data(), blk->in.size());
+    blk->method = "storing";
+}
+
+
 struct LzmaCtx {
     CLzmaEncHandle enc;
     CLzmaEncProps  props;
@@ -135,7 +143,6 @@ struct Job4x4 {
     std::vector<uint8_t> in;
     std::vector<uint8_t> out;
     std::string          method;
-    bool                 ready;
     uint8_t *rp; int rl;
     int      wp;
 };
@@ -159,12 +166,11 @@ static int job4x4Cb(const char *what, void *data, int size, void *aux) {
 }
 
 struct SubBlock {
-    int         blkId;        // solid block index
-    int         seq;          // sub-block sequence within solid block
+    int         blkId;
+    int         seq;
     bool        lastInBlock;
     std::vector<uint8_t> in, out;
     std::string method;
-    uint8_t    *rp; int rl; int wp; // for generic compress fallback
 };
 
 
@@ -304,35 +310,17 @@ public:
                     j = workQ.front(); workQ.pop();
                 }
 
-                int r;
-                if (j->method != "storing" && isIncompressible(j->in.data(), j->in.size())) {
-                    j->out.resize(j->in.size());
-                    memcpy(j->out.data(), j->in.data(), j->in.size());
-                    j->method = "storing";
-                    r = 0;
-                } else if (j->method == "storing") {
-                    j->out.resize(j->in.size());
-                    memcpy(j->out.data(), j->in.data(), j->in.size());
-                    r = 0;
+                int r = 0;
+                if (j->method == "storing" || isIncompressible(j->in.data(), j->in.size())) {
+                    storeRaw(j);
                 } else if (useLzmaDirect && lctx.initialized) {
                     r = compressBlockLzma(&lctx, j);
                 } else {
                     r = compressBlockGeneric(j);
                 }
 
-                // if compression expanded the data, store raw
-                if (r == 0 && j->method != "storing" && (int)j->out.size() >= (int)j->in.size()) {
-                    j->out.resize(j->in.size());
-                    memcpy(j->out.data(), j->in.data(), j->in.size());
-                    j->method = "storing";
-                }
-
-                if (r < 0) {
-                    j->out.resize(j->in.size());
-                    memcpy(j->out.data(), j->in.data(), j->in.size());
-                    j->method = "storing";
-                }
-                j->ready = true;
+                if (r < 0 || (j->method != "storing" && (int)j->out.size() >= (int)j->in.size()))
+                    storeRaw(j);
 
                 {
                     std::lock_guard<std::mutex> lk(mtx);
@@ -369,7 +357,6 @@ public:
             j->seq    = seqNum++;
             j->in.assign(readBuf.data(), readBuf.data()+total);
             j->method = base;
-            j->ready  = false;
 
             {
                 std::lock_guard<std::mutex> lk(mtx);

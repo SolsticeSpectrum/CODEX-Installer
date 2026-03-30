@@ -39,21 +39,21 @@ public:
 
     SDL_Texture *LoadTexture(const std::string &filename);
 
-    SDL_Renderer *Renderer() const { return m_renderer; }
+    SDL_Renderer *Renderer() const { return FRenderer; }
 
 private:
-    SDL_Renderer *m_renderer = nullptr;
-    json m_objects;
-    json m_colors;
-    json m_sysColors;
-    json m_fonts;
-    std::string m_assetsDir;
+    SDL_Renderer *FRenderer = nullptr;
+    json FObjects;
+    json FColors;
+    json FSysColors;
+    json FFonts;
+    std::string FAssetsDir;
 
-    TTF_Font *m_labelFont   = nullptr;
-    TTF_Font *m_buttonFont  = nullptr;
-    TTF_Font *m_captionFont = nullptr;
+    TTF_Font *FLabelFont   = nullptr;
+    TTF_Font *FButtonFont  = nullptr;
+    TTF_Font *FCaptionFont = nullptr;
 
-    std::map<std::string, SDL_Texture *> m_texCache;
+    std::map<std::string, SDL_Texture *> FTexCache;
 
     json FindIn(const json &arr, const std::vector<std::string> &path, int depth) const;
     SDL_Color ParseColor(const std::string &hex) const;
