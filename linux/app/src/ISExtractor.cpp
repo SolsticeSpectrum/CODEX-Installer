@@ -84,18 +84,10 @@ bool ISArcExtract::Extract(const std::string &inFile, const std::string &outPath
     ui.cancelled  = cancelled;
     ui.pctOfTotal = pctOfTotal;
 
-    printf("ISArcExtract: %s -> %s\n", inFile.c_str(), outPath.c_str());
-    fflush(stdout);
-
     COMMAND command(6, argv);
-    printf("ISArcExtract: command.ok=%d arcname=%s\n", command.ok, command.arcname ? command.arcname : "null");
-    fflush(stdout);
-
     if (!command.ok) return false;
 
     PROCESS process(&command, &ui);
-    printf("ISArcExtract: done\n");
-    fflush(stdout);
     return true;
 }
 
@@ -298,10 +290,10 @@ void ISExtractor::Start() {
 
             bool ok = ISArcExtract::Extract(
                 FBinFiles[i], FTarget, pctOfTotal,
-                [this, i, arcCount](int overalPct, int currentPct, const char *file) -> int {
+                [this, i, arcCount](int overallPct, int currentPct, const char *file) -> int {
                     if (FCancelled) return 1;
                     while (FPaused && !FCancelled) SDL_Delay(50);
-                    int totalPct = (i * 1000 / arcCount) + overalPct / arcCount;
+                    int totalPct = (i * 1000 / arcCount) + overallPct / arcCount;
                     if (FOnProgress) FOnProgress(totalPct, file);
                     return FCancelled ? 1 : 0;
                 },

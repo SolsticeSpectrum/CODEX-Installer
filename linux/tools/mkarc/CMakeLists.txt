@@ -55,7 +55,7 @@ target_compile_options(freearc PRIVATE
     -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-narrowing
 )
 
-add_executable(mkarc mkarc.cpp)
+add_executable(mkarc main.cpp)
 target_include_directories(mkarc PRIVATE ${UNARC} ${UNARC}/Compression)
 target_compile_definitions(mkarc PRIVATE
     FREEARC_UNIX FREEARC_INTEL_BYTE_ORDER FREEARC_64BIT
