@@ -189,10 +189,11 @@ private:
     SDL_Texture *FClientBgTex = nullptr;
     std::string  FClientTile;
 
-    // title text
+    // title bar
     int         FTitleTextML = 0, FTitleTextMR = 0;
     std::string FTitleTextAlign;
     SDL_Rect    FTitleTextRect = {};
+    SDL_Rect    FIconRect      = {};
 
     // music controls
     SDL_Texture *FPlayN      = nullptr, *FPlayH     = nullptr, *FPlayP     = nullptr;

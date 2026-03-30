@@ -2,8 +2,6 @@
 #include "TSeBitmapObject.h"
 #include "DrawStyleEdge.h"
 #include <fstream>
-#include <filesystem>
-#include <cstring>
 
 
 static bool HitTest(int x, int y, const SDL_Rect &r) {
@@ -21,7 +19,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     std::ifstream lf(layoutPath);
     if (lf.is_open()) FLayout = json::parse(lf, nullptr, false);
 
-    // read frame dimensions from theme before creating window
+    // frame dimensions
     {
         std::ifstream tf(themeDir + "/theme.json");
         if (!tf.is_open()) return false;
@@ -88,7 +86,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FStyleSource.GetMargins(bbObj, FBbML, FBbMT, FBbMR, FBbMB);
     FBorderBTex = load("border_bottomborder_active.png");
 
-    // correct border sizes from actual bitmaps
+    // border sizes from bitmaps
     if (FBorderLTex) { int tw; SDL_QueryTexture(FBorderLTex, nullptr, nullptr, &tw, nullptr); FBorderL = tw; }
     if (FBorderRTex) { int tw; SDL_QueryTexture(FBorderRTex, nullptr, nullptr, &tw, nullptr); FBorderR = tw; }
     if (FBorderBTex) { int th; SDL_QueryTexture(FBorderBTex, nullptr, nullptr, nullptr, &th); FBorderB = th; }
@@ -155,7 +153,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FScrollThumbH = load("scrollbar_vert_slider_hot.png");
     FScrollThumbP = load("scrollbar_vert_slider_pressed.png");
 
-    // pre-multiplied alpha blend: src + dst*(1-srcA)
+    // premultiplied alpha
     auto pmBlend = SDL_ComposeCustomBlendMode(
         SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
         SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
@@ -207,20 +205,22 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FCloseButtonRect = {closeX, capY, FWndBtnW, FWndBtnH};
     FMinButtonRect   = {minX,   capY, FWndBtnW, FWndBtnH};
 
-    // all 5 slots for text centering
-    int helpX = rightEdge - 5 * FWndBtnW;
     auto capTitle = FStyleSource.GetObjectByName("Form/Image/Title/Caption/sysButtons/CaptionTitle");
     FTitleTextML    = FStyleSource.GetInt(capTitle, "TextMarginLeft", 0);
     FTitleTextMR    = FStyleSource.GetInt(capTitle, "TextMarginRight", 90);
     FTitleTextAlign = FStyleSource.GetString(capTitle, "TextAlign", "taCenter");
 
-    auto sysMenuObj = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
-    int smLeft      = FStyleSource.GetInt(sysMenuObj, "Left", 6);
-    int smWidth     = FStyleSource.GetInt(sysMenuObj, "Width", 21);
+    auto btnSysMenu = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
+    int smL = FStyleSource.GetInt(btnSysMenu, "Left", 6);
+    int smT = FStyleSource.GetInt(btnSysMenu, "Top", 2);
+    int smW = FStyleSource.GetInt(btnSysMenu, "Width", 21);
+    int smH = FStyleSource.GetInt(btnSysMenu, "Height", 20);
 
-    int ctH  = FStyleSource.GetInt(capTitle, "Height", 28);
-    int capH = FStyleSource.GetInt(captionObj, "Height", 28);
+    // icon
+    FIconRect = {smL - 2 + (smW - 16) / 2, smT + (smH - 16) / 2, 16, 16};
 
+    // title text
+    int ctH   = FStyleSource.GetInt(capTitle, "Height", 28);
     int textY = (capY + ctH >= FTitleH) ? capY : 0;
     int textH = (capY + ctH >= FTitleH) ? ctH  : FTitleH;
 
@@ -229,7 +229,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
         FTitleTextRect = {capX, textY,
                          ctWidth - FTitleTextML - FTitleTextMR, textH};
     } else {
-        int smRight = smLeft - 1 + smWidth;
+        int smRight = smL - 1 + smW;
         FTitleTextRect = {smRight, textY, closeX - smRight, textH};
     }
 
@@ -239,7 +239,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     if (!FIconTex)
         FIconTex = IMG_LoadTexture(FRenderer, (assetsDir + "/Icon" + iconNum + ".ico").c_str());
 
-    // music control bitmaps - replace black with clBtnFace
+    // music controls (ReplaceColor = clBlack -> clBtnFace)
     auto wc = FStyleSource.GetSysColor("clBtnFace");
     auto loadBmp = [&](const std::string &path) -> SDL_Texture * {
         SDL_Surface *surf = SDL_LoadBMP(path.c_str());
@@ -405,14 +405,8 @@ void TWizardForm::PaintNC() {
     SDL_Rect client = {FBorderL, FTitleH, w - FBorderL - FBorderR, h - FTitleH - FBorderB};
     SDL_RenderFillRect(FRenderer, &client);
 
-    // icon
-    if (FIconTex) {
-        auto sm = FStyleSource.GetObjectByName("Form/Image/Title/Caption/btnSysMenu");
-        int smL = FStyleSource.GetInt(sm, "Left", 6) - 2, smT = FStyleSource.GetInt(sm, "Top", 2);
-        int smW = FStyleSource.GetInt(sm, "Width", 21), smH = FStyleSource.GetInt(sm, "Height", 20);
-        SDL_Rect id = {smL + (smW - 16) / 2, smT + (smH - 16) / 2, 16, 16};
-        SDL_RenderCopy(FRenderer, FIconTex, nullptr, &id);
-    }
+    if (FIconTex)
+        SDL_RenderCopy(FRenderer, FIconTex, nullptr, &FIconRect);
 
     // title text
     TSeBitmapObject::DrawText(FRenderer, FStyleSource.CaptionFont(), FClrTitleText,
@@ -591,7 +585,7 @@ void TWizardForm::ProgressDraw() {
     SDL_SetRenderDrawColor(FRenderer, logBg.r, logBg.g, logBg.b, 255);
     SDL_RenderFillRect(FRenderer, &logInner);
 
-    // VertFrame track clipped to scrollbar column
+    // track (clipped to scrollbar column)
     SDL_Rect vfR   = {scrollX - FSvfML, upR.y + upR.h,
                       scrollW + FSvfML + FSvfMR, dnR.y - (upR.y + upR.h)};
     SDL_Rect clipR = {scrollX, upR.y + upR.h, scrollW, dnR.y - (upR.y + upR.h)};
@@ -606,7 +600,7 @@ void TWizardForm::ProgressDraw() {
     SDL_SetRenderDrawColor(FRenderer, FClrEdit.r, FClrEdit.g, FClrEdit.b, 255);
     SDL_RenderFillRect(FRenderer, &textArea);
 
-    // scrollbar state
+    // scrollbar
     auto *logFont = FStyleSource.ButtonFont();
     int lineH     = logFont ? TTF_FontLineSkip(logFont) : 14;
     int maxLines  = (textArea.h - 4) / lineH;
@@ -772,7 +766,7 @@ void TWizardForm::WMMouseDown(int x, int y) {
         Mix_VolumeMusic(int(FVolume * MIX_MAX_VOLUME));
     }
 
-    // scrollbar arrows
+    // scrollbar
     if (FLogMaxScroll > 0) {
         if (HitTest(x, y, FLogUpR)) { FScrollTopPressed = true; FLogScroll = std::max(0, FLogScroll - 1); return; }
         if (HitTest(x, y, FLogDnR)) { FScrollBotPressed = true; FLogScroll = std::min(FLogMaxScroll, FLogScroll + 1); return; }
@@ -784,7 +778,7 @@ void TWizardForm::WMMouseDown(int x, int y) {
         }
     }
 
-    // drag by titlebar + logo area
+    // titlebar drag
     if (y < FTitleH + 65 && !HitTest(x, y, FCloseButtonRect) && !HitTest(x, y, FMinButtonRect)) {
         FDragging = true;
         FDragX = x; FDragY = y;
