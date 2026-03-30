@@ -16,6 +16,7 @@ add_executable(installer
     src/TSeBitmapObject.cpp
     src/DrawStyleEdge.cpp
     src/TWizardForm.cpp
+    src/ISExtractor.cpp
     include/miniz.c
 )
 

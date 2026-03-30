@@ -325,6 +325,7 @@ void TWizardForm::Run() {
             else HandleEvent(e);
         }
 
+        // TODO: replace with ISExtractor thread callback
         if (FStep == wpInstalling && !ISPaused) {
             Uint32 now = SDL_GetTicks();
             if (now - LastTick >= 50) {
@@ -800,7 +801,7 @@ void TWizardForm::WMMouseUp(int x, int y) {
         btnLeftButton.Pressed = false;
         if (HitTest(x, y, btnLeftButton.Rect)) {
             if (FStep == wpInstalling) { CurPageChanged(wpSelectDir); LogLines.push_back("Cancelled."); }
-            else if (FStep == wpFinished) { /* run */ }
+            else if (FStep == wpFinished) { /* TODO: launch game executable */ }
             else FRunning = false;
         }
     }
@@ -819,6 +820,14 @@ void TWizardForm::WMMouseUp(int x, int y) {
             ISPaused = !ISPaused;
             btnPause.Caption = ISPaused ? "Resume" : "Pause";
         }
+    }
+
+    // TODO: open Qt QFileDialog with VCL theme colors + button bitmaps
+    if (btnDirBrowse.Pressed) {
+        btnDirBrowse.Pressed = false;
+    }
+    if (btnGroupBrowse.Pressed) {
+        btnGroupBrowse.Pressed = false;
     }
 }
 
