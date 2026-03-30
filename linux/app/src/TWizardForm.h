@@ -17,6 +17,7 @@ public:
                          const std::string &logoNum, const std::string &iconNum,
                          const std::string &musicNum);
 
+    void SetSourceDir(const std::string &dir) { FSourceDir = dir; }
     void Run();
     void DeinitializeSetup();
 
@@ -53,6 +54,7 @@ private:
     TSeStyleSource FStyleSource;
     json           FLayout;
     std::string    FAssetsDir;
+    std::string    FSourceDir;  // {src} — dir containing installer + .bin files
     SDL_Window    *FWindow   = nullptr;
     SDL_Renderer  *FRenderer = nullptr;
     bool           FRunning  = true;

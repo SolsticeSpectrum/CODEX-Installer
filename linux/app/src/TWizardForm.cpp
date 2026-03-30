@@ -289,7 +289,7 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
 
     // init widgets
     DirEdit.Name = "DirEdit";
-    DirEdit.Text = "/home/" + std::string(getenv("USER") ? getenv("USER") : "user") + "/Games/Example Game";
+    DirEdit.Text = "/home/" + std::string(getenv("USER") ? getenv("USER") : "user") + "/installer-test/installed";
     GroupEdit.Name = "GroupEdit";
     GroupEdit.Text = "Example Game";
     Drives.push_back("/");
@@ -591,7 +591,6 @@ void TWizardForm::ProgressDraw() {
     SDL_SetRenderDrawColor(FRenderer, FClrEdit.r, FClrEdit.g, FClrEdit.b, 255);
     SDL_RenderFillRect(FRenderer, &textArea);
 
-    // scrollbar
     auto *logFont = FStyleSource.ButtonFont();
     int lineH     = logFont ? TTF_FontLineSkip(logFont) : 14;
     int maxLines  = (textArea.h - 4) / lineH;
@@ -757,7 +756,7 @@ void TWizardForm::WMMouseDown(int x, int y) {
         Mix_VolumeMusic(int(FVolume * MIX_MAX_VOLUME));
     }
 
-    // scrollbar
+    // scrollbar arrows + thumb
     if (FLogMaxScroll > 0) {
         if (HitTest(x, y, FLogUpR)) { FScrollTopPressed = true; FLogScroll = std::max(0, FLogScroll - 1); return; }
         if (HitTest(x, y, FLogDnR)) { FScrollBotPressed = true; FLogScroll = std::min(FLogMaxScroll, FLogScroll + 1); return; }
@@ -933,9 +932,15 @@ void TWizardForm::CurPageChanged(ISStep step) {
         LogLines.clear();
         LogLines.push_back("Extracting files...");
 
+        // matches setup.iss {src} for .bin files, tools in assets
+        FExtractor.SetSource(FSourceDir);
+        FExtractor.SetTarget(DirEdit.Text);
+        FExtractor.SetToolsDir(FAssetsDir + "/tools");
+        // matches setup.iss ProgressCallback
         FExtractor.SetOnProgress([this](int pct, const std::string &file) {
-            ProgressValue = pct;
-            LogLines.push_back(file);
+            if (pct <= 1000) ProgressValue = pct;
+            if (LogLines.empty() || LogLines.back() != file)
+                LogLines.push_back(file);
         });
         FExtractor.SetOnFinish([this](bool ok) {
             CurPageChanged(wpFinished);

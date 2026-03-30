@@ -17,10 +17,16 @@ if [ -z "$VARIANT" ] || [ -z "$LOGO" ] || [ -z "$ICON" ] || [ -z "$MUSIC" ] || [
 fi
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
+mkdir -p "$DIR/build"
+cd "$DIR/build"
 
-# pack assets
+# 1) build tools first
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 > /dev/null 2>&1
+make -j$(nproc) srep xdelta3 precomp
+
+# 2) pack assets (including tools)
 PACK=$(mktemp -d)
-mkdir -p "$PACK/assets"
+mkdir -p "$PACK/assets" "$PACK/tools"
 cp "$DIR/themes/$THEME/assets/"*.png "$PACK/assets/"
 cp "$DIR/themes/$THEME/theme.json" "$PACK/"
 cp "$DIR/layout.json" "$PACK/"
@@ -31,6 +37,10 @@ cp "$DIR/assets/Music${MUSIC}.ogg" "$PACK/"
 cp "$DIR/assets"/Play{1,2,3}.bmp "$DIR/assets"/Pause{1,2,3}.bmp "$PACK/"
 cp "$DIR/assets/TrackBkg.bmp" "$DIR/assets"/TrackBtn{1,2,3}.bmp "$PACK/"
 
+[ -f srep ]                      && cp srep "$PACK/tools/"
+[ -f xdelta3 ]                   && cp xdelta3 "$PACK/tools/"
+[ -f include/precomp/precomp ]   && cp include/precomp/precomp "$PACK/tools/"
+
 ZIP=$(mktemp --suffix=.zip)
 rm -f "$ZIP"
 (cd "$PACK" && zip -q -9 -r "$ZIP" .)
@@ -39,14 +49,13 @@ sed -i "s|unsigned char .*\[\]|unsigned char embedded_assets_zip[]|" "$DIR/data/
 sed -i "s|unsigned int .*_len|unsigned int embedded_assets_zip_len|" "$DIR/data/assets_data.h"
 rm -rf "$PACK" "$ZIP"
 
-# build
-mkdir -p "$DIR/build"
-cd "$DIR/build"
+# 3) build installer (with tools embedded in assets_data.h)
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DCMAKE_CXX_FLAGS="-DLOGO_NUM=\\\"$LOGO\\\" -DICON_NUM=\\\"$ICON\\\" -DMUSIC_NUM=\\\"$MUSIC\\\"" \
     > /dev/null 2>&1
-make -j$(nproc)
+make -j$(nproc) installer
 
 mv installer "${VARIANT,,}-installer"
 echo "built: ${VARIANT,,}-installer"

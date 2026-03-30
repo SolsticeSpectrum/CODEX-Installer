@@ -1,0 +1,64 @@
+diff --git a/ArcCommand.h b/ArcCommand.h
+index c1c3bc0..96a147c 100644
+--- a/ArcCommand.h
++++ b/ArcCommand.h
+@@ -83,7 +83,7 @@ void RegisterExternalCompressors (char *progname)
+ #ifndef FREEARC_TINY
+   // Open config file arc.ini found in the same dir as sfx/unarc
+   char *cfgfile = "arc.ini";
+-  char *name = (char*) malloc (strlen(progname) + strlen(cfgfile));
++  char *name = (char*) malloc (strlen(progname) + strlen(cfgfile) + 2);
+                                                  if (!name)  return;
+   strcpy(name, progname);
+   strcpy(drop_dirname(name), cfgfile);
+diff --git a/Compression/PPMD/Model.cpp b/Compression/PPMD/Model.cpp
+index 29bec9e..ef25f02 100644
+--- a/Compression/PPMD/Model.cpp
++++ b/Compression/PPMD/Model.cpp
+@@ -88,7 +88,7 @@ inline PPMD_STARTUP::PPMD_STARTUP()         // constants initialization
+         QTable[i]=m;
+         if ( !--k ) { k = ++Step;           m++; }
+     }
+-    (DWORD&) DummySEE2Cont=PPMdSignature;
++    (*(uint32_t*)&DummySEE2Cont)=(uint32_t)PPMdSignature;
+ }
+ static void _STDCALL StartModelRare(int _MaxOrder,MR_METHOD _MRMethod)
+ {
+diff --git a/Compression/PPMD/PPMdType.h b/Compression/PPMD/PPMdType.h
+index fd1a918..d598c8d 100644
+--- a/Compression/PPMD/PPMdType.h
++++ b/Compression/PPMD/PPMdType.h
+@@ -18,7 +18,7 @@ typedef int   BOOL;
+ #define TRUE  1
+ typedef unsigned char  BYTE;
+ typedef unsigned short WORD;
+-typedef unsigned long  DWORD;
++typedef unsigned int   DWORD;
+ typedef unsigned int   UINT;
+ #endif
+ 
+diff --git a/Compression/LZMA2/C/LzFind.c b/Compression/LZMA2/C/LzFind.c
+index 1234567..abcdefg 100644
+--- a/Compression/LZMA2/C/LzFind.c
++++ b/Compression/LZMA2/C/LzFind.c
+@@ -145,6 +145,7 @@ void MatchFinder_Construct(CMatchFinder *p)
+   p->bufferBase = 0;
+   p->directInput = 0;
+   p->hash = 0;
++  p->son = 0;
+   MatchFinder_SetDefaultSettings(p);
+
+   for (i = 0; i < 256; i++)
+diff --git a/Compression/Tornado/MatchFinder.cpp b/Compression/Tornado/MatchFinder.cpp
+index a19dff3..db47df8 100644
+--- a/Compression/Tornado/MatchFinder.cpp
++++ b/Compression/Tornado/MatchFinder.cpp
+@@ -3,7 +3,7 @@
+ // LZ77 model *************************************************************************************
+ 
+ typedef uint   HashVal;      // Result of hashing function
+-typedef uint32 PtrVal;       // Pointers to buf stored in HTable
++typedef uintptr_t PtrVal;       // Pointers to buf stored in HTable
+ typedef uint32 HintVal;      // Cached bytes from buf stored in HTable
+ 
+ // Maximum number of bytes used for hashing in any match finder.

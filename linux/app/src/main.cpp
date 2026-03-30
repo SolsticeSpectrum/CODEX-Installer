@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 #include "TWizardForm.h"
-#include "../include/miniz.h"
+#include "miniz.h"
 #include "../data/assets_data.h"
 
 #ifndef LOGO_NUM
@@ -47,6 +47,10 @@ static std::string ExtractAssets() {
             mkdir(out.substr(0, slash).c_str(), 0755);
 
         mz_zip_reader_extract_to_file(&zip, i, out.c_str(), 0);
+
+        // make tools executable
+        if (std::string(fname).find("tools/") == 0)
+            chmod(out.c_str(), 0755);
     }
 
     mz_zip_reader_end(&zip);
@@ -54,7 +58,7 @@ static std::string ExtractAssets() {
 }
 
 
-int main(int, char *[]) {
+int main(int argc, char *argv[]) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
@@ -63,7 +67,16 @@ int main(int, char *[]) {
     std::string dir = ExtractAssets();
     if (dir.empty()) return 1;
 
+    // {src} = directory containing the installer binary
+    std::string srcDir = ".";
+    if (argc > 0) {
+        srcDir = std::filesystem::path(argv[0]).parent_path().string();
+        if (srcDir.empty()) srcDir = ".";
+    }
+    srcDir = std::filesystem::canonical(srcDir).string();
+
     TWizardForm form;
+    form.SetSourceDir(srcDir);
     if (!form.InitializeSetup(dir, dir, dir + "/layout.json", dir, LOGO_NUM, ICON_NUM, MUSIC_NUM)) {
         std::filesystem::remove_all(dir);
         return 1;

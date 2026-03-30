@@ -1,0 +1,18 @@
+[submodule "linux/app/include/unarc"]
+	path = linux/app/include/unarc
+	url = https://github.com/xredor/unarc.git
+[submodule "linux/app/include/unrar"]
+	path = linux/app/include/unrar
+	url = https://github.com/pmachapman/unrar.git
+[submodule "linux/app/include/7zip"]
+	path = linux/app/include/7zip
+	url = https://github.com/ip7z/7zip.git
+[submodule "linux/app/include/xdelta"]
+	path = linux/app/include/xdelta
+	url = https://github.com/jmacd/xdelta.git
+[submodule "linux/app/include/srep"]
+	path = linux/app/include/srep
+	url = https://github.com/Intensity/srep.git
+[submodule "linux/app/include/precomp"]
+	path = linux/app/include/precomp
+	url = https://github.com/schnaader/precomp-cpp.git
