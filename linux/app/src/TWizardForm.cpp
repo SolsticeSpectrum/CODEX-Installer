@@ -909,6 +909,7 @@ void TWizardForm::CurPageChanged(ISStep step) {
         btnPause.Visible = false;
 
         FShowResult = false;
+
     } else if (step == wpInstalling) {
         DirEdit.Enabled   = false;  DirEdit.Focused  = false;
         GroupEdit.Enabled = false;  GroupEdit.Focused = false;

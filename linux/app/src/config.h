@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr bool TestMode        = true;
+constexpr bool TestMode        = false;
 
 constexpr int ClientWidth      = 482;
 constexpr int ClientHeight     = 583;
