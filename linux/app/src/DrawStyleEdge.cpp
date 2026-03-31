@@ -22,11 +22,13 @@ void DrawStyleEdge(SDL_Renderer *r, const SDL_Rect &rect,
 
 void DrawBevelRaised(SDL_Renderer *r, const SDL_Rect &rect,
                      SDL_Color highlight, SDL_Color shadow) {
+
     DrawStyleEdge(r, rect, highlight, shadow, true, false);
 }
 
 
 void DrawBevelLowered(SDL_Renderer *r, const SDL_Rect &rect,
                       SDL_Color highlight, SDL_Color shadow) {
+
     DrawStyleEdge(r, rect, highlight, shadow, false, true);
 }

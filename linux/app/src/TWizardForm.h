@@ -45,7 +45,7 @@ private:
     void WMTextInput(const char *text);
     void WMKeyDown(SDL_Keycode key);
 
-    // setup.iss CurPageChanged
+    // step transition
     void CurPageChanged(ISStep step);
 
     // layout rect from layout.json, offset by border + titlebar
@@ -54,7 +54,7 @@ private:
     TSeStyleSource FStyleSource;
     json           FLayout;
     std::string    FAssetsDir;
-    std::string    FSourceDir;  // {src} — dir containing installer + .bin files
+    std::string    FSourceDir;  // dir with installer and .bin files
     SDL_Window    *FWindow   = nullptr;
     SDL_Renderer  *FRenderer = nullptr;
     bool           FRunning  = true;

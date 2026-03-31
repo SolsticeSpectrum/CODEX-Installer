@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     std::string dir = ExtractAssets();
     if (dir.empty()) return 1;
 
-    // {src} = directory containing the installer binary
+    // resolve {src}
     std::string srcDir = ".";
     if (argc > 0) {
         srcDir = std::filesystem::path(argv[0]).parent_path().string();

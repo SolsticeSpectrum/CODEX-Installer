@@ -11,7 +11,6 @@
 using ISDoneCallback = std::function<int(int overallPct, int currentPct,
                                          const char *currentFile)>;
 
-
 class ISArcExtract {
 public:
     static bool Extract(const std::string &inFile, const std::string &outPath,
@@ -19,11 +18,13 @@ public:
                         std::atomic<bool> *cancelled);
 };
 
+
 class IS7zipExtract {
 public:
     static bool Extract(const std::string &inFile, const std::string &outPath,
                         ISDoneCallback callback, std::atomic<bool> *cancelled);
 };
+
 
 class ISRarExtract {
 public:
@@ -70,7 +71,7 @@ private:
     int FCurrentBin = 0;
     std::thread FThread;
 
-    // mockup fallback
+    // test mode
     int      FMockProgress = 0;
     int      FMockFile     = 0;
     uint32_t FLastTick     = 0;

@@ -6,6 +6,7 @@
 void TSeBitmapObject::DrawRect(SDL_Renderer *r, SDL_Texture *atlas,
                                const SDL_Rect &src, const SDL_Rect &dst,
                                const std::string &tileStyle) {
+
     if (src.w <= 0 || src.h <= 0 || dst.w <= 0 || dst.h <= 0) return;
 
     if (tileStyle == "tsTile" || tileStyle == "tsHorzCenterTile" || tileStyle == "tsVertCenterTile") {
@@ -40,6 +41,7 @@ void TSeBitmapObject::DrawRect(SDL_Renderer *r, SDL_Texture *atlas,
 
 void TSeBitmapObject::DrawNormal(SDL_Renderer *r, SDL_Texture *tex,
                                  const SDL_Rect &dst, const std::string &tileStyle) {
+
     if (!tex || dst.w <= 0 || dst.h <= 0) return;
 
     int tw, th;
@@ -76,6 +78,7 @@ void TSeBitmapObject::DrawNormal(SDL_Renderer *r, SDL_Texture *tex,
 void TSeBitmapObject::Draw(SDL_Renderer *r, SDL_Texture *atlas,
                            const SDL_Rect &srcRect, int ml, int mt, int mr, int mb,
                            const SDL_Rect &dst) {
+
     if (dst.w <= 0 || dst.h <= 0) return;
 
     if (ml == 0 && mt == 0 && mr == 0 && mb == 0) {

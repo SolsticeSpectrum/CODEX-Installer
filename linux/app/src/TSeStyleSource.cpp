@@ -14,6 +14,7 @@ TSeStyleSource::~TSeStyleSource() {
 
 bool TSeStyleSource::LoadFromFile(SDL_Renderer *renderer, const std::string &themeJson,
                                   const std::string &assetsDir, const std::string &fontsDir) {
+
     FRenderer  = renderer;
     FAssetsDir = assetsDir;
 
@@ -28,7 +29,7 @@ bool TSeStyleSource::LoadFromFile(SDL_Renderer *renderer, const std::string &the
     FSysColors = theme["sys_colors"];
     FFonts     = theme["fonts"];
 
-    // 9pt ≈ 12px, 8pt ≈ 11px
+    // 9pt ~ 12px, 8pt ~ 11px
     FLabelFont   = TTF_OpenFont((fontsDir + "/ArialBd.ttf").c_str(), 12);
     FButtonFont  = TTF_OpenFont((fontsDir + "/tahoma.ttf").c_str(), 11);
     FCaptionFont = TTF_OpenFont((fontsDir + "/tahomabd.ttf").c_str(), 11);

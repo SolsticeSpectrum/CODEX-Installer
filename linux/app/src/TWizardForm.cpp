@@ -294,8 +294,8 @@ bool TWizardForm::InitializeSetup(const std::string &assetsDir, const std::strin
     FClrBtnTextD  = FStyleSource.GetFontColor("ktfButtonTextDisabled");
 
     // init widgets
-    DirEdit.Name = "DirEdit";
-    DirEdit.Text = "/home/" + std::string(getenv("USER") ? getenv("USER") : "user") + "/installer-test/installed";
+    DirEdit.Name   = "DirEdit";
+    DirEdit.Text   = "/home/" + std::string(getenv("USER") ? getenv("USER") : "user") + "/installer-test/installed";
     GroupEdit.Name = "GroupEdit";
     GroupEdit.Text = "Example Game";
     Drives.push_back("/");
@@ -358,16 +358,16 @@ void TWizardForm::Paint() {
     auto hl = FStyleSource.GetSysColor("clBtnHighlight");
     auto sh = FStyleSource.GetSysColor("clBtnShadow");
 
-    DrawBevelRaised(FRenderer,  LayoutRect("bvlDirectories"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlDirInstall"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlIconGroup"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlOptions"), hl, sh);
+    DrawBevelRaised(FRenderer,  LayoutRect("bvlDirectories"),    hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlDirInstall"),     hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlIconGroup"),      hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlOptions"),        hl, sh);
     DrawBevelLowered(FRenderer, LayoutRect("bvlInstallOptions"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlButtons"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlLeftButton"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlRightButton"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlProgressForm"), hl, sh);
-    DrawBevelLowered(FRenderer, LayoutRect("bvlProgressGauge"), hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlButtons"),        hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlLeftButton"),     hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlRightButton"),    hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlProgressForm"),   hl, sh);
+    DrawBevelLowered(FRenderer, LayoutRect("bvlProgressGauge"),  hl, sh);
 
     EditDraw();
     LabelDraw();
@@ -674,7 +674,7 @@ void TWizardForm::AudioDraw() {
 void TWizardForm::ResultDraw() {
     if (!FShowResult) return;
 
-    SDL_Rect r = LayoutRect("lblInstallResult");
+    SDL_Rect r  = LayoutRect("lblInstallResult");
     SDL_Color c = {0x00, 0xdd, 0x34, 255};
     TSeBitmapObject::DrawText(FRenderer, FStyleSource.CaptionFont(), c, "Successfully Installed", r, "taCenter");
 }
@@ -692,7 +692,7 @@ void TWizardForm::HandleEvent(const SDL_Event &e) {
                 if (FLogScroll > FLogMaxScroll) FLogScroll = FLogMaxScroll;
             }
             break;
-        case SDL_TEXTINPUT:       WMTextInput(e.text.text); break;
+        case SDL_TEXTINPUT:       WMTextInput(e.text.text);    break;
         case SDL_KEYDOWN:         WMKeyDown(e.key.keysym.sym); break;
     }
 }
@@ -754,6 +754,7 @@ void TWizardForm::WMMouseDown(int x, int y) {
             FLogDragging  = true;
             FLogDragY     = y;
             FLogDragStart = FLogScroll;
+            
             return;
         }
     }
@@ -767,11 +768,12 @@ void TWizardForm::WMMouseDown(int x, int y) {
 
 
 void TWizardForm::HandleBrowse(const std::string &title, TNewEdit &edit) {
-    auto bg = FStyleSource.GetSysColor("clBtnFace");
-    auto fg = FStyleSource.GetSysColor("clBtnText");
-    auto wb = FStyleSource.GetSysColor("clWindow");
-    auto wt = FStyleSource.GetSysColor("clWindowText");
+    auto bg  = FStyleSource.GetSysColor("clBtnFace");
+    auto fg  = FStyleSource.GetSysColor("clBtnText");
+    auto wb  = FStyleSource.GetSysColor("clWindow");
+    auto wt  = FStyleSource.GetSysColor("clWindowText");
     auto dir = TSelectFolderForm::Execute(title, edit.Text, bg, fg, wb, wt);
+
     if (!dir.empty()) edit.Text = dir;
 }
 
@@ -847,6 +849,7 @@ void TWizardForm::WMMouseMove(int x, int y) {
     if (FTrackBtnN) {
         int tw, th; SDL_QueryTexture(FTrackBtnN, nullptr, nullptr, &tw, &th);
         SDL_Rect trackR = LayoutRect("bmpTrackBar");
+
         int thumbX = trackR.x + (int)(FVolume * (trackR.w - tw));
         int thumbY = trackR.y + (trackR.h - th) / 2;
         SDL_Rect tbR = {thumbX, thumbY, tw, th};
@@ -906,7 +909,6 @@ void TWizardForm::CurPageChanged(ISStep step) {
         btnPause.Visible = false;
 
         FShowResult = false;
-
     } else if (step == wpInstalling) {
         DirEdit.Enabled   = false;  DirEdit.Focused  = false;
         GroupEdit.Enabled = false;  GroupEdit.Focused = false;
@@ -920,19 +922,19 @@ void TWizardForm::CurPageChanged(ISStep step) {
         FLogLines.clear();
         FLogLines.push_back("Extracting files...");
 
-        // matches setup.iss {src} for .bin files, tools in assets
         FExtractor.SetSource(FSourceDir);
         FExtractor.SetTarget(DirEdit.Text);
         FExtractor.SetToolsDir(FAssetsDir + "/tools");
-        // matches setup.iss ProgressCallback
         FExtractor.SetOnProgress([this](int pct, const std::string &file) {
             if (pct <= 1000) FProgressValue = pct;
             if (FLogLines.empty() || FLogLines.back() != file)
                 FLogLines.push_back(file);
         });
+
         FExtractor.SetOnFinish([this](bool ok) {
             CurPageChanged(wpFinished);
         });
+
         FExtractor.Start();
 
     } else if (step == wpFinished) {

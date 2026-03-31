@@ -11,6 +11,112 @@ index c1c3bc0..96a147c 100644
                                                   if (!name)  return;
    strcpy(name, progname);
    strcpy(drop_dirname(name), cfgfile);
+diff --git a/Compression/4x4/C_4x4.cpp b/Compression/4x4/C_4x4.cpp
+new file mode 100644
+index 0000000..2a9485a
+--- /dev/null
++++ b/Compression/4x4/C_4x4.cpp
+@@ -0,0 +1,88 @@
++// 4x4 parallel compression method — decompressor side
++// Reads framed blocks: [origSz:u32][compSz:u32][method\0][compData]
++// Each sub-block decompressed independently via DecompressMem
++
++#include "../Compression.h"
++
++class METHOD_4x4 : public COMPRESSION_METHOD {
++public:
++    char base[MAX_METHOD_STRLEN];
++    MemSize blockSize;
++
++    METHOD_4x4() { strcpy(base, "lzma"); blockSize = 8*mb; addtime = -1; }
++
++    int decompress(CALLBACK_FUNC *callback, void *auxdata) {
++        int errcode = 0;
++        int blockNum = 0;
++        for (;;) {
++            uint32_t origSz, compSz;
++            int r = callback("read", &origSz, 4, auxdata);
++            if (r != 4) break;
++            r = callback("read", &compSz, 4, auxdata);
++            if (r != 4) { errcode = FREEARC_ERRCODE_READ; break; }
++            // read compressed frame
++            BYTE *comp = (BYTE*)BigAlloc(compSz);
++            if (!comp) { errcode = FREEARC_ERRCODE_NOT_ENOUGH_MEMORY; break; }
++            int pos = 0;
++            while (pos < (int)compSz) {
++                r = callback("read", comp+pos, compSz-pos, auxdata);
++                if (r <= 0) { BigFree(comp); errcode = FREEARC_ERRCODE_READ; goto done; }
++                pos += r;
++            }
++
++            // method string is at start of frame
++            char *meth = (char*)comp;
++            int mlen = strlen(meth) + 1;
++            // decompress
++            BYTE *orig = (BYTE*)BigAlloc(origSz);
++            if (!orig) { BigFree(comp); errcode = FREEARC_ERRCODE_NOT_ENOUGH_MEMORY; break; }
++
++            int dr = DecompressMem(meth, comp+mlen, compSz-mlen, orig, origSz);
++            BigFree(comp);
++            if (dr < 0) { BigFree(orig); errcode = dr; break; }
++            blockNum++;
++
++            r = callback("write", orig, origSz, auxdata);
++            BigFree(orig);
++            if (r == FREEARC_ERRCODE_NO_MORE_DATA_REQUIRED) { errcode = r; goto done; }
++            if (r != (int)origSz) { errcode = FREEARC_ERRCODE_WRITE; goto done; }
++        }
++        done: return errcode;
++    }
++
++#ifndef FREEARC_DECOMPRESS_ONLY
++    int compress(CALLBACK_FUNC *callback, void *auxdata) {
++        // compress side handled by mkarc's Method4x4 with thread pool
++        return FREEARC_ERRCODE_NOT_IMPLEMENTED;
++    }
++
++    void ShowCompressionMethod(char *buf) {
++        sprintf(buf, "4x4:%s", base);
++    }
++    MemSize GetCompressionMem()   { return blockSize * 6; }
++    void SetCompressionMem(MemSize m) { blockSize = m / 6; }
++#endif
++
++    MemSize GetDecompressionMem() { return blockSize * 2; }
++    MemSize GetDictionary()       { return blockSize; }
++    MemSize GetBlockSize()        { return blockSize; }
++    void SetDecompressionMem(MemSize) {}
++    void SetDictionary(MemSize d) { blockSize = d; }
++    void SetBlockSize(MemSize b)  { blockSize = b; }
++};
++
++static COMPRESSION_METHOD *parse_4x4(char **parameters) {
++    if (strcmp(parameters[0], "4x4") != 0) return NULL;
++
++    METHOD_4x4 *p = new METHOD_4x4;
++    // remaining params form the base method
++    char buf[MAX_METHOD_STRLEN] = "";
++    for (int i = 1; parameters[i]; i++) {
++        if (buf[0]) strcat(buf, ":");
++        strcat(buf, parameters[i]);
++    }
++    if (buf[0]) strcpy(p->base, buf);
++    return p;
++}
++
++static int _4x4_reg = AddCompressionMethod(parse_4x4);
+diff --git a/Compression/LZMA2/C/LzFind.c b/Compression/LZMA2/C/LzFind.c
+index 5e5bb9f..f0b59b8 100644
+--- a/Compression/LZMA2/C/LzFind.c
++++ b/Compression/LZMA2/C/LzFind.c
+@@ -146,6 +146,7 @@ void MatchFinder_Construct(CMatchFinder *p)
+   p->bufferBase = 0;
+   p->directInput = 0;
+   p->hash = 0;
++  p->son = 0;
+   MatchFinder_SetDefaultSettings(p);
+ 
+   for (i = 0; i < 256; i++)
 diff --git a/Compression/PPMD/Model.cpp b/Compression/PPMD/Model.cpp
 index 29bec9e..ef25f02 100644
 --- a/Compression/PPMD/Model.cpp
@@ -37,18 +143,6 @@ index fd1a918..d598c8d 100644
  typedef unsigned int   UINT;
  #endif
  
-diff --git a/Compression/LZMA2/C/LzFind.c b/Compression/LZMA2/C/LzFind.c
-index 1234567..abcdefg 100644
---- a/Compression/LZMA2/C/LzFind.c
-+++ b/Compression/LZMA2/C/LzFind.c
-@@ -145,6 +145,7 @@ void MatchFinder_Construct(CMatchFinder *p)
-   p->bufferBase = 0;
-   p->directInput = 0;
-   p->hash = 0;
-+  p->son = 0;
-   MatchFinder_SetDefaultSettings(p);
-
-   for (i = 0; i < 256; i++)
 diff --git a/Compression/Tornado/MatchFinder.cpp b/Compression/Tornado/MatchFinder.cpp
 index a19dff3..db47df8 100644
 --- a/Compression/Tornado/MatchFinder.cpp

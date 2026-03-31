@@ -1,10 +1,10 @@
 #include "ISExtractor.h"
+#include "config.h"
 #include <SDL.h>
 #include <filesystem>
 #include <cstring>
 #include <sys/stat.h>
 
-// unarc
 #undef  ON_CHECK_FAIL
 #define ON_CHECK_FAIL()   UnarcQuit()
 void UnarcQuit();
@@ -13,7 +13,6 @@ void UnarcQuit();
 #include "ArcProcess.h"
 void UnarcQuit() { CurrentProcess->quit(FREEARC_ERRCODE_GENERAL); }
 
-// 7zip C decoder
 extern "C" {
 #include "7zip/C/7z.h"
 #include "7zip/C/7zAlloc.h"
@@ -22,7 +21,6 @@ extern "C" {
 #include "7zip/C/7zFile.h"
 }
 
-// unrar DLL API
 #ifndef _UNIX
 #define _UNIX
 #endif
@@ -30,8 +28,6 @@ extern "C" {
 
 namespace fs = std::filesystem;
 
-
-// ---------- ISArcExtract (FreeArc .bin) ----------
 
 class ExtractUI : public BASEUI {
 public:
@@ -58,6 +54,7 @@ public:
             int pct = totalBytes > 0 ? (int)(writtenTotal * pctOfTotal / totalBytes) : 0;
             callback(pct * 10, 0, filename);
         }
+
         return true;
     }
 
@@ -71,6 +68,7 @@ public:
 bool ISArcExtract::Extract(const std::string &inFile, const std::string &outPath,
                            double pctOfTotal, ISDoneCallback callback,
                            std::atomic<bool> *cancelled) {
+
     std::string dpPath = "-dp" + outPath;
     char *argv[] = {(char*)"unarc", (char*)"x",
                     (char*)inFile.c_str(),
@@ -92,14 +90,14 @@ bool ISArcExtract::Extract(const std::string &inFile, const std::string &outPath
 }
 
 
-// ---------- IS7zipExtract (.7z) ----------
-
 static void *ISAlloc(ISzAllocPtr, size_t size)  { return size ? malloc(size) : nullptr; }
 static void  ISFree(ISzAllocPtr, void *addr)    { free(addr); }
 static const ISzAlloc g_ISAlloc = { ISAlloc, ISFree };
 
+
 bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPath,
                             ISDoneCallback callback, std::atomic<bool> *cancelled) {
+
     CrcGenerateTable();
 
     CFileInStream archiveStream;
@@ -143,11 +141,11 @@ bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPat
         for (size_t j = 0; j < nameLen - 1; j++) {
             uint16_t c = nameBuf[j];
             if (c < 0x80)        { name += (char)c; }
-            else if (c < 0x800)  { name += (char)(0xC0 | (c >> 6));
-                                   name += (char)(0x80 | (c & 0x3F)); }
-            else                 { name += (char)(0xE0 | (c >> 12));
+            else if (c < 0x800)  { name += (char)(0xC0 | ( c >> 6));
+                                   name += (char)(0x80 | ( c &  0x3F)); }
+            else                 { name += (char)(0xE0 | ( c >> 12));
                                    name += (char)(0x80 | ((c >> 6) & 0x3F));
-                                   name += (char)(0x80 | (c & 0x3F)); }
+                                   name += (char)(0x80 | ( c &  0x3F)); }
         }
 
         bool isDir = SzArEx_IsDir(&db, i);
@@ -183,16 +181,16 @@ bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPat
     ISzAlloc_Free(&g_ISAlloc, outBuffer);
     SzArEx_Free(&db, &g_ISAlloc);
     File_Close(&archiveStream.file);
+
     return res == SZ_OK;
 }
 
-
-// ---------- ISRarExtract (.rar) ----------
 
 struct RarCallbackData {
     ISDoneCallback callback;
     std::atomic<bool> *cancelled;
 };
+
 
 static int CALLBACK RarCallback(UINT msg, LPARAM userData, LPARAM p1, LPARAM p2) {
     auto *data = (RarCallbackData *)userData;
@@ -202,8 +200,10 @@ static int CALLBACK RarCallback(UINT msg, LPARAM userData, LPARAM p1, LPARAM p2)
     return 0;
 }
 
+
 bool ISRarExtract::Extract(const std::string &inFile, const std::string &outPath,
                            ISDoneCallback callback, std::atomic<bool> *cancelled) {
+
     // first pass: count files
     RAROpenArchiveData arcData = {};
     arcData.ArcName  = (char *)inFile.c_str();
@@ -248,8 +248,6 @@ bool ISRarExtract::Extract(const std::string &inFile, const std::string &outPath
 }
 
 
-// ---------- ISExtractor (orchestrator) ----------
-
 ISExtractor::~ISExtractor() {
     Cancel();
     if (FThread.joinable()) FThread.join();
@@ -268,21 +266,30 @@ void ISExtractor::Start() {
     FPaused    = false;
     FCancelled = false;
 
-    // count setup-N.bin (matches setup.iss ArcFileCount loop)
+    // find setup-N.bin files
     FBinFiles.clear();
     FCurrentBin = 0;
     int idx = 1;
     while (true) {
         auto path = FSourceDir + "/setup-" + std::to_string(idx) + ".bin";
         if (!fs::exists(path)) break;
+
         FBinFiles.push_back(path);
         idx++;
     }
 
     if (FBinFiles.empty()) {
-        FMockProgress = 0;
-        FMockFile     = 0;
-        FLastTick     = SDL_GetTicks();
+        if constexpr (TestMode) {
+            FMockProgress = 0;
+            FMockFile     = 0;
+            FLastTick     = SDL_GetTicks();
+            return;
+        }
+
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "File not found!",
+            "setup-1.bin not found.\nPlace archive files next to the installer.", nullptr);
+        FRunning = false;
+        if (FOnFinish) FOnFinish(false);
         return;
     }
 
@@ -303,10 +310,13 @@ void ISExtractor::Start() {
                 [this, i, arcCount](int overallPct, int currentPct, const char *file) -> int {
                     if (FCancelled) return 1;
                     while (FPaused && !FCancelled) SDL_Delay(50);
+
                     int totalPct = (i * 1000 / arcCount) + overallPct / arcCount;
                     if (FOnProgress) FOnProgress(totalPct, file);
+
                     return FCancelled ? 1 : 0;
                 },
+
                 &FCancelled
             );
 
@@ -332,8 +342,7 @@ void ISExtractor::Cancel() {
 void ISExtractor::Tick() {
     if (!FRunning || FPaused) return;
 
-    // mockup when no .bin files
-    if (FBinFiles.empty()) {
+    if (FBinFiles.empty() && TestMode) {
         uint32_t now = SDL_GetTicks();
         if (now - FLastTick < 50) return;
         FLastTick = now;
@@ -344,6 +353,7 @@ void ISExtractor::Tick() {
             if (FOnProgress)
                 FOnProgress(FMockProgress, "Extracting file " + std::to_string(FMockFile) + " of 100...");
         }
+
         if (FMockProgress > 1000) {
             FRunning = false;
             if (FOnFinish) FOnFinish(true);
