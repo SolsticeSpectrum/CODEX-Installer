@@ -4,6 +4,8 @@
 #include "compress.h"
 #include "multicompress.h"
 
+extern "C" int AddExternalCompressor(char *params);
+
 
 static std::string volumePath(const std::string &base, int vol) {
     auto dot = base.rfind('.');
@@ -133,6 +135,25 @@ int main(int argc, char *argv[]) {
 
     InitCRC();
     SetCompressionThreads(1);
+
+    // resolve tool paths relative to mkarc binary
+    std::string binDir = fs::canonical(fs::path(argv[0])).parent_path().string();
+
+    std::string precompDef =
+        "[External compressor:precomp]\n"
+        "packcmd = " + binDir + "/precomp -cn $$arcdatafile$$.tmp $$arcpackedfile$$.tmp\n"
+        "unpackcmd = " + binDir + "/precomp -r $$arcpackedfile$$.tmp $$arcdatafile$$.tmp\n";
+    std::string srepDef =
+        "[External compressor:srep]\n"
+        "packcmd = " + binDir + "/srep $$arcdatafile$$.tmp $$arcpackedfile$$.tmp\n"
+        "unpackcmd = " + binDir + "/srep -d $$arcpackedfile$$.tmp $$arcdatafile$$.tmp\n";
+    std::string xdeltaDef =
+        "[External compressor:xdelta3]\n"
+        "packcmd = " + binDir + "/xdelta3 -e -s $$arcdatafile$$.tmp $$arcdatafile$$.tmp $$arcpackedfile$$.tmp\n"
+        "unpackcmd = " + binDir + "/xdelta3 -d -s $$arcdatafile$$.tmp $$arcpackedfile$$.tmp $$arcdatafile$$.tmp\n";
+    AddExternalCompressor(strdup(precompDef.c_str()));
+    AddExternalCompressor(strdup(srepDef.c_str()));
+    AddExternalCompressor(strdup(xdeltaDef.c_str()));
 
     std::vector<FE> files;
     collect(srcDir, files);

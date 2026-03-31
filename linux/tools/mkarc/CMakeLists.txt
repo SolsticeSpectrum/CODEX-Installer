@@ -34,7 +34,7 @@ set(FREEARC_SRCS
     ${UNARC}/Compression/Delta/C_Delta.cpp
     ${UNARC}/Compression/REP/C_REP.cpp
     ${UNARC}/Compression/LZP/C_LZP.cpp
-    # TODO: fix PPMD 64-bit static init corruption
+    # PPMD: needs 32-bit heap offsets instead of raw pointers (sizeof(PPM_CONTEXT) 24 vs 12)
     # ${UNARC}/Compression/PPMD/C_PPMD.cpp
     ${UNARC}/Compression/External/C_External.cpp
     ${UNARC}/Compression/MM/C_MM.cpp
