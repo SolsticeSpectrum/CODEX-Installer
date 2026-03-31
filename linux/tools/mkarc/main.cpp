@@ -141,19 +141,18 @@ int main(int argc, char *argv[]) {
 
     std::string precompDef =
         "[External compressor:precomp]\n"
-        "packcmd = " + binDir + "/precomp -cn $$arcdatafile$$.tmp $$arcpackedfile$$.tmp\n"
-        "unpackcmd = " + binDir + "/precomp -r $$arcpackedfile$$.tmp $$arcdatafile$$.tmp\n";
+        "datafile = arcdata.tmp\n"
+        "packedfile = arcdata.pcf\n"
+        "packcmd = " + binDir + "/precomp -cn arcdata.tmp\n"
+        "unpackcmd = " + binDir + "/precomp -r arcdata.pcf\n";
     std::string srepDef =
         "[External compressor:srep]\n"
-        "packcmd = " + binDir + "/srep $$arcdatafile$$.tmp $$arcpackedfile$$.tmp\n"
-        "unpackcmd = " + binDir + "/srep -d $$arcpackedfile$$.tmp $$arcdatafile$$.tmp\n";
-    std::string xdeltaDef =
-        "[External compressor:xdelta3]\n"
-        "packcmd = " + binDir + "/xdelta3 -e -s $$arcdatafile$$.tmp $$arcdatafile$$.tmp $$arcpackedfile$$.tmp\n"
-        "unpackcmd = " + binDir + "/xdelta3 -d -s $$arcdatafile$$.tmp $$arcpackedfile$$.tmp $$arcdatafile$$.tmp\n";
+        "datafile = arcdata.tmp\n"
+        "packedfile = arcpacked.tmp\n"
+        "packcmd = " + binDir + "/srep arcdata.tmp arcpacked.tmp\n"
+        "unpackcmd = " + binDir + "/srep -d arcpacked.tmp arcdata.tmp\n";
     AddExternalCompressor(strdup(precompDef.c_str()));
     AddExternalCompressor(strdup(srepDef.c_str()));
-    AddExternalCompressor(strdup(xdeltaDef.c_str()));
 
     std::vector<FE> files;
     collect(srcDir, files);

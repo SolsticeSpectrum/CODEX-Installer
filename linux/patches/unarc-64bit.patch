@@ -106,7 +106,7 @@ index 0000000..2a9485a
 +
 +static int _4x4_reg = AddCompressionMethod(parse_4x4);
 diff --git a/Compression/Common.cpp b/Compression/Common.cpp
-index ed54ded..e7bd2be 100644
+index ed54ded..9d3bf8a 100644
 --- a/Compression/Common.cpp
 +++ b/Compression/Common.cpp
 @@ -5,7 +5,7 @@
@@ -181,7 +181,7 @@ index ed54ded..e7bd2be 100644
 +  if (command[0] == '/')
 +    sprintf(cmd, "%s%s", command, wait_finish? "" : " &");
 +  else
-+    sprintf(cmd, "./%s%s", command, wait_finish? "" : " &");
++    sprintf(cmd, "%s%s", command, wait_finish? "" : " &");
    int ExitCode = system(cmd);
  
    chdir(olddir);
