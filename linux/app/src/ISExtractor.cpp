@@ -85,6 +85,10 @@ bool ISArcExtract::Extract(const std::string &inFile, const std::string &outPath
     COMMAND command(6, argv);
     if (!command.ok) return false;
 
+    // reset longjmp state between archive extractions
+    extern int jmpready;
+    jmpready = FALSE;
+
     PROCESS process(&command, &ui);
     return true;
 }

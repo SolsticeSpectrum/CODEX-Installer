@@ -49,6 +49,7 @@ target_include_directories(unarc PRIVATE ${UNARC} ${UNARC}/Compression)
 target_compile_definitions(unarc PRIVATE
     FREEARC_UNIX FREEARC_INTEL_BYTE_ORDER FREEARC_64BIT
     FREEARC_DECOMPRESS_ONLY _NO_EXCEPTIONS UNARC
+    _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE
 )
 target_compile_options(unarc PRIVATE
     -fno-exceptions -fno-rtti -O2
@@ -170,6 +171,7 @@ target_include_directories(installer PRIVATE
 target_compile_definitions(installer PRIVATE
     FREEARC_UNIX FREEARC_INTEL_BYTE_ORDER FREEARC_64BIT
     FREEARC_DECOMPRESS_ONLY _NO_EXCEPTIONS UNARC
+    _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE
 )
 
 target_link_libraries(installer PRIVATE
