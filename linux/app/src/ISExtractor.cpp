@@ -108,8 +108,6 @@ bool ISArcExtract::Extract(const std::string &inFile, const std::string &outPath
     ui.cancelled  = cancelled;
     ui.pctOfTotal = pctOfTotal;
 
-    RegisterExternalTools();
-
     COMMAND command(6, argv);
     if (!command.ok) return false;
 
@@ -301,15 +299,18 @@ void ISExtractor::Start() {
     FPaused    = false;
     FCancelled = false;
 
-    // find setup-N.bin files
     FBinFiles.clear();
     FCurrentBin = 0;
     int idx = 1;
     while (true) {
-        auto path = FSourceDir + "/setup-" + std::to_string(idx) + ".bin";
-        if (!fs::exists(path)) break;
+        std::string num = std::to_string(idx);
+        std::string base = FSourceDir + "/setup-" + num;
 
-        FBinFiles.push_back(path);
+        if      (fs::exists(base + ".bin")) FBinFiles.push_back(base + ".bin");
+        else if (fs::exists(base + ".7z"))  FBinFiles.push_back(base + ".7z");
+        else if (fs::exists(base + ".rar")) FBinFiles.push_back(base + ".rar");
+        else break;
+
         idx++;
     }
 
@@ -344,20 +345,25 @@ void ISExtractor::Start() {
             FCurrentBin = i;
             double pctOfTotal = 100.0 / arcCount;
 
-            bool ok = ISArcExtract::Extract(
-                FBinFiles[i], FTarget, pctOfTotal,
-                [this, i, arcCount](int overallPct, int currentPct, const char *file) -> int {
-                    if (FCancelled) return 1;
-                    while (FPaused && !FCancelled) SDL_Delay(50);
+            auto progressCb = [this, i, arcCount](int overallPct, int currentPct, const char *file) -> int {
+                if (FCancelled) return 1;
+                while (FPaused && !FCancelled) SDL_Delay(50);
 
-                    int totalPct = (i * 1000 / arcCount) + overallPct / arcCount;
-                    if (FOnProgress) FOnProgress(totalPct, file);
+                int totalPct = (i * 1000 / arcCount) + overallPct / arcCount;
+                if (FOnProgress) FOnProgress(totalPct, file);
 
-                    return FCancelled ? 1 : 0;
-                },
+                return FCancelled ? 1 : 0;
+            };
 
-                &FCancelled
-            );
+            auto &path = FBinFiles[i];
+            bool ok;
+
+            if (path.size() > 3 && path.substr(path.size() - 3) == ".7z")
+                ok = IS7zipExtract::Extract(path, FTarget, progressCb, &FCancelled);
+            else if (path.size() > 4 && path.substr(path.size() - 4) == ".rar")
+                ok = ISRarExtract::Extract(path, FTarget, progressCb, &FCancelled);
+            else
+                ok = ISArcExtract::Extract(path, FTarget, pctOfTotal, progressCb, &FCancelled);
 
             if (!ok) { error = true; break; }
         }

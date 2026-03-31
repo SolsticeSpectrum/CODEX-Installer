@@ -52,7 +52,7 @@ target_compile_definitions(unarc PRIVATE
     _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE
 )
 target_compile_options(unarc PRIVATE
-    -fno-exceptions -fno-rtti -O2
+    -fno-exceptions -fno-rtti -O2 -fno-strict-aliasing
     -Wno-write-strings -Wno-sign-compare -Wno-conversion
     -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-but-set-variable
 )
@@ -106,7 +106,8 @@ add_library(7zdec STATIC
 )
 target_include_directories(7zdec PRIVATE ${SZ})
 target_compile_definitions(7zdec PRIVATE _7ZIP_ST)
-target_compile_options(7zdec PRIVATE -O2 -Wno-unused-parameter)
+target_compile_options(7zdec PRIVATE -O2 -Wno-unused-parameter
+    -include ${CMAKE_CURRENT_SOURCE_DIR}/include/7zip_prefix.h)
 
 # xdelta3 — external tool for FreeArc pipeline
 set(XD ${CMAKE_CURRENT_SOURCE_DIR}/include/xdelta/xdelta3)
@@ -157,8 +158,8 @@ add_executable(installer
     include/miniz.c
 )
 
-# ISExtractor uses unarc headers with UB casts that break under -O2
-set_source_files_properties(src/ISExtractor.cpp PROPERTIES COMPILE_FLAGS "-O0")
+set_source_files_properties(src/ISExtractor.cpp PROPERTIES
+    COMPILE_FLAGS "-O0 -include ${CMAKE_CURRENT_SOURCE_DIR}/include/7zip_prefix.h")
 
 target_include_directories(installer PRIVATE
     ${SDL2_INCLUDE_DIRS}
@@ -183,8 +184,7 @@ target_link_libraries(installer PRIVATE
     ${SDL2_IMAGE_LIBRARIES}
     ${SDL2_TTF_LIBRARIES}
     ${SDL2_MIXER_LIBRARIES}
-    7zdec
-    -Wl,--whole-archive unarc -Wl,--no-whole-archive -Wl,--allow-multiple-definition
-    unrar
+    -Wl,--whole-archive unarc -Wl,--no-whole-archive
+    unrar 7zdec
     pthread rt
 )

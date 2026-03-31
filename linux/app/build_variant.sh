@@ -51,7 +51,7 @@ rm -rf "$PACK" "$ZIP"
 
 # 3) build installer (with tools embedded in assets_data.h)
 cmake .. \
-    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DCMAKE_CXX_FLAGS="-DLOGO_NUM=\\\"$LOGO\\\" -DICON_NUM=\\\"$ICON\\\" -DMUSIC_NUM=\\\"$MUSIC\\\"" \
     > /dev/null 2>&1
