@@ -65,7 +65,6 @@ int main(int argc, char *argv[]) {
     Mix_Init(MIX_INIT_OGG);
 
     std::string dir = ExtractAssets();
-    if (dir.empty()) return 1;
 
     // resolve {src}
     std::string srcDir = ".";

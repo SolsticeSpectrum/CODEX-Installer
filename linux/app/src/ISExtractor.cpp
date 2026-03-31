@@ -5,6 +5,32 @@
 #include <cstring>
 #include <sys/stat.h>
 
+extern "C" int AddExternalCompressor(char *params);
+
+static bool g_externalRegistered = false;
+
+static void RegisterExternalTools() {
+    if (g_externalRegistered) return;
+    g_externalRegistered = true;
+
+    // same definitions as mkarc - filenames without $$ to avoid shell expansion
+    char precomp[] =
+        "[External compressor:precomp]\n"
+        "datafile = arcdata.tmp\n"
+        "packedfile = arcdata.pcf\n"
+        "packcmd = precomp -cn arcdata.tmp\n"
+        "unpackcmd = precomp -r arcdata.pcf\n";
+    char srep[] =
+        "[External compressor:srep]\n"
+        "datafile = arcdata.tmp\n"
+        "packedfile = arcpacked.tmp\n"
+        "packcmd = srep arcdata.tmp arcpacked.tmp\n"
+        "unpackcmd = srep -d arcpacked.tmp arcdata.tmp\n";
+
+    AddExternalCompressor(precomp);
+    AddExternalCompressor(srep);
+}
+
 #undef  ON_CHECK_FAIL
 #define ON_CHECK_FAIL()   UnarcQuit()
 void UnarcQuit();
@@ -82,10 +108,11 @@ bool ISArcExtract::Extract(const std::string &inFile, const std::string &outPath
     ui.cancelled  = cancelled;
     ui.pctOfTotal = pctOfTotal;
 
+    RegisterExternalTools();
+
     COMMAND command(6, argv);
     if (!command.ok) return false;
 
-    // reset longjmp state between archive extractions
     extern int jmpready;
     jmpready = FALSE;
 
@@ -300,7 +327,11 @@ void ISExtractor::Start() {
     if (FThread.joinable()) FThread.join();
 
     FThread = std::thread([this]() {
-        if (!FToolsDir.empty()) chdir(FToolsDir.c_str());
+        if (!FToolsDir.empty()) {
+            // add tools dir to PATH so external compressors (srep, precomp) are found
+            std::string path = FToolsDir + ":" + (getenv("PATH") ? getenv("PATH") : "");
+            setenv("PATH", path.c_str(), 1);
+        }
 
         int arcCount = (int)FBinFiles.size();
         bool error = false;

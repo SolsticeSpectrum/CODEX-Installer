@@ -157,6 +157,9 @@ add_executable(installer
     include/miniz.c
 )
 
+# ISExtractor uses unarc headers with UB casts that break under -O2
+set_source_files_properties(src/ISExtractor.cpp PROPERTIES COMPILE_FLAGS "-O0")
+
 target_include_directories(installer PRIVATE
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_IMAGE_INCLUDE_DIRS}
