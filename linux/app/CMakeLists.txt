@@ -175,6 +175,7 @@ target_compile_definitions(installer PRIVATE
     FREEARC_UNIX FREEARC_INTEL_BYTE_ORDER FREEARC_64BIT
     FREEARC_DECOMPRESS_ONLY _NO_EXCEPTIONS UNARC
     _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE
+    _7ZIP_ST
 )
 
 target_link_libraries(installer PRIVATE
@@ -182,7 +183,8 @@ target_link_libraries(installer PRIVATE
     ${SDL2_IMAGE_LIBRARIES}
     ${SDL2_TTF_LIBRARIES}
     ${SDL2_MIXER_LIBRARIES}
+    7zdec
     -Wl,--whole-archive unarc -Wl,--no-whole-archive -Wl,--allow-multiple-definition
-    unrar 7zdec
+    unrar
     pthread rt
 )

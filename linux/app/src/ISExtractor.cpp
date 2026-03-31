@@ -136,8 +136,10 @@ bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPat
     CSzArEx db;
     SRes res;
 
-    if (InFile_Open(&archiveStream.file, inFile.c_str()))
+    if (InFile_Open(&archiveStream.file, inFile.c_str())) {
+        printf("7z: can't open %s\n", inFile.c_str());
         return false;
+    }
 
     FileInStream_CreateVTable(&archiveStream);
     LookToRead2_CreateVTable(&lookStream, False);
@@ -151,9 +153,11 @@ bool IS7zipExtract::Extract(const std::string &inFile, const std::string &outPat
     SzArEx_Init(&db);
     res = SzArEx_Open(&db, &lookStream.vt, &g_ISAlloc, &g_ISAlloc);
     if (res != SZ_OK) {
+        printf("7z: SzArEx_Open failed res=%d\n", res);
         File_Close(&archiveStream.file);
         return false;
     }
+    printf("7z: opened, %d files\n", db.NumFiles);
 
     UInt32 blockIndex = 0xFFFFFFFF;
     Byte *outBuffer = nullptr;
