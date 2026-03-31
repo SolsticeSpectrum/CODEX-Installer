@@ -111,6 +111,8 @@ bool ISArcExtract::Extract(const std::string &inFile, const std::string &outPath
     COMMAND command(6, argv);
     if (!command.ok) return false;
 
+    RegisterExternalTools();
+
     extern int jmpready;
     jmpready = FALSE;
 
