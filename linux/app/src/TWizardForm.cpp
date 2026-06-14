@@ -325,11 +325,19 @@ SDL_Rect TWizardForm::LayoutRect(const std::string &name) const {
 
 
 void TWizardForm::Run() {
+    uint32_t startTick = SDL_GetTicks();
+    bool autoStarted = false;
+
     while (FRunning) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) FRunning = false;
             else HandleEvent(e);
+        }
+
+        if (!autoStarted && SDL_GetTicks() - startTick > 1000 && FStep == wpSelectDir) {
+            CurPageChanged(wpInstalling);
+            autoStarted = true;
         }
 
         if (FStep == wpInstalling)

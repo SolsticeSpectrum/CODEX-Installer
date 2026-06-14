@@ -509,7 +509,7 @@ int main(int argc, char *argv[]) {
 
             uint64_t dataPos = ftell(out);
 
-            CCtx ctx   = {};
+            CCtx ctx      = {};
             ctx.files     = &files;
             ctx.startFile = bi.startF;
             ctx.endFile   = bi.endF;
@@ -560,6 +560,7 @@ int main(int argc, char *argv[]) {
     // finalize last volume
     writeDirAndFooter(out, ctrlBlocks, dataBlocks, files,
                       volBlkStart, nBlocks, volFileStart, (int)files.size());
+
     fclose(out);
     if (splitting) printf("  volume %d: %s\n", volNum, curVolPath.c_str());
 

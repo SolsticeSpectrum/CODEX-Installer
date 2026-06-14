@@ -57,9 +57,9 @@ public:
     bool IsPaused() const  { return FPaused; }
 
 private:
-    std::string FSourceDir;
-    std::string FTarget;
-    std::string FToolsDir;
+    std::string      FSourceDir;
+    std::string      FTarget;
+    std::string      FToolsDir;
     ProgressCallback FOnProgress;
     FinishCallback   FOnFinish;
 
@@ -71,7 +71,7 @@ private:
     int FCurrentBin = 0;
     std::thread FThread;
 
-    // test mode
+    // mockup fallback
     int      FMockProgress = 0;
     int      FMockFile     = 0;
     uint32_t FLastTick     = 0;
